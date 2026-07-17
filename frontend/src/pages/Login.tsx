@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react"
 import { useNavigate, useLocation } from "react-router-dom"
-import { Mail, Lock, LogIn, AlertCircle, Eye, EyeOff, Loader2 } from "lucide-react"
+import { User, Lock, LogIn, AlertCircle, Eye, EyeOff, Loader2 } from "lucide-react"
 import { login as apiLogin, isAuthenticated } from "../services/auth"
 import "../premium.css"
 
@@ -103,8 +103,8 @@ export default function Login() {
 
         {/* Form */}
         <form onSubmit={handleSubmit} style={{ padding: '0 var(--space-8) var(--space-8)' }}>
-          {/* Email */}
-          <Field label="Email">
+          {/* Username */}
+          <Field label="Username">
             <div style={{
               position: 'relative',
               display: 'flex', alignItems: 'center',
@@ -113,16 +113,16 @@ export default function Login() {
               borderRadius: 'var(--radius-md)',
               transition: 'border-color 0.12s',
             }}>
-              <Mail size={14} strokeWidth={1.75} color="var(--text-tertiary)"
+              <User size={14} strokeWidth={1.75} color="var(--text-tertiary)"
                 style={{ position: 'absolute', left: 'var(--space-3)', pointerEvents: 'none' }} />
               <input
-                type="email"
+                type="text"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 autoComplete="username"
                 required
                 disabled={submitting}
-                placeholder="you@digicelgroup.com"
+                placeholder="your username"
                 style={{
                   width: '100%', height: '42px',
                   paddingLeft: 'var(--space-8)', paddingRight: 'var(--space-3)',
