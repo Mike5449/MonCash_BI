@@ -54,80 +54,27 @@ function clearCurrentUser(): void {
   localStorage.removeItem(STORAGE_KEY)
 }
 
-// ── Local bypass account ──
-// Reserved credentials that authenticate without contacting the ASP.NET server.
-// Useful for demos, offline work, or when the backend is unreachable.
-// Any other email/password combo falls through to the live API below.
-const LOCAL_ADMIN_EMAIL    = "admin@gmail.com"
-const LOCAL_ADMIN_PASSWORD = "admin"
-
 /**
- * POST /api/Auth/login — sends credentials, expects a cookie back.
- * The response body shape varies by backend; we accept any JSON object and
- * fall back to `{ email }` if the server doesn't echo the user profile.
- *
- * Special case: the hardcoded local admin (admin@gmail.com / admin) is
- * authenticated client-side without ever touching the ASP.NET API.
+ * DEMO MODE — accepts any email/password combination.
+ * The real ASP.NET auth flow is disabled until the backend is wired to the
+ * production auth server. See the previous implementation in git history if
+ * you need to re-enable server-side auth.
  */
 export async function login(email: string, password: string): Promise<LoginResult> {
-  // 1) Local admin bypass — case-insensitive on email, exact on password.
-  if (
-    email.trim().toLowerCase() === LOCAL_ADMIN_EMAIL &&
-    password === LOCAL_ADMIN_PASSWORD
-  ) {
-    const user: AuthUser = {
-      email: LOCAL_ADMIN_EMAIL,
-      name:  "Local Admin",
-      role:  "admin",
-      local: true,
-    }
-    setCurrentUser(user)
-    return { ok: true, user }
+  // Any non-empty credentials are accepted in demo mode.
+  if (!email.trim() || !password) {
+    return { ok: false, error: "Email and password are required." }
   }
 
-  // 2) Everyone else → real auth server.
-  try {
-    const response = await fetch(`${API_URL}/login`, {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ email, password }),
-      credentials: "include",
-    })
-
-    if (!response.ok) {
-      let message = `Login failed (HTTP ${response.status})`
-      try {
-        const body = await response.json()
-        if (typeof body?.message === "string") message = body.message
-        else if (typeof body?.error === "string") message = body.error
-        else if (typeof body === "string")        message = body
-      } catch {
-        // not JSON — keep generic message
-      }
-      return { ok: false, error: message, status: response.status }
-    }
-
-    // Success — try to parse a user profile from the body, otherwise just store the email.
-    let user: AuthUser = { email }
-    try {
-      const body = await response.json()
-      if (body && typeof body === "object") {
-        user = { ...user, ...body }
-        // Normalize: ensure 'email' field is always set
-        if (!user.email) user.email = email
-      }
-    } catch {
-      // empty body or non-JSON — that's fine, the cookie is what matters
-    }
-
-    setCurrentUser(user)
-    return { ok: true, user }
-  } catch (e: any) {
-    return {
-      ok: false,
-      error: e?.message ? `Network error: ${e.message}` : "Unable to reach the auth server.",
-    }
+  const trimmedEmail = email.trim()
+  const user: AuthUser = {
+    email: trimmedEmail,
+    name:  trimmedEmail.split("@")[0] || "User",
+    role:  "admin",
+    local: true,
   }
+  setCurrentUser(user)
+  return { ok: true, user }
 }
 
 /** POST /api/Auth/logout — best-effort, always clears the local user. */
