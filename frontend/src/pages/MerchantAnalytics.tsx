@@ -1,10 +1,10 @@
 import { DashboardLayout } from "../components/Layout/DashboardLayout"
 import { useMerchantAccounts } from "../hooks/useAnalytics"
-import { Store, TrendingUp, Search, MapPin, Tag, Download } from "lucide-react"
+import { Store, TrendingUp, MapPin, Tag, Download } from "lucide-react"
 import "../premium.css"
 
 export default function MerchantAnalytics() {
-  const { data: merchants, isLoading } = useMerchantAccounts(100)
+  const { data: merchants, isLoading } = useMerchantAccounts({ limit: 100 })
 
   return (
     <DashboardLayout>
@@ -27,7 +27,7 @@ export default function MerchantAnalytics() {
           </div>
           <div>
             <div className="kpi-label" style={{ fontSize: '11px', fontWeight: '800', color: '#64748b', textTransform: 'uppercase' }}>Total Active Merchants</div>
-            <div className="kpi-value" style={{ fontSize: '24px', fontWeight: '800' }}>{merchants?.length || 0}</div>
+            <div className="kpi-value" style={{ fontSize: '24px', fontWeight: '800' }}>{merchants?.total ?? merchants?.rows?.length ?? 0}</div>
           </div>
         </div>
         
@@ -73,9 +73,9 @@ export default function MerchantAnalytics() {
             <tbody>
               {isLoading ? (
                 <tr><td colSpan={5} style={{ textAlign: 'center', padding: '60px' }}>Connecting to Databricks cluster for merchant data...</td></tr>
-              ) : merchants?.length === 0 ? (
+              ) : (merchants?.rows?.length ?? 0) === 0 ? (
                 <tr><td colSpan={5} style={{ textAlign: 'center', padding: '60px' }}>No merchants found in the latest data code.</td></tr>
-              ) : merchants?.map((m, idx) => (
+              ) : merchants?.rows?.map((m: any, idx: number) => (
                 <tr key={idx}>
                   <td style={{ fontWeight: '700' }}>{m.MERCHANT_NAME}</td>
                   <td style={{ color: 'var(--mc-text-sub)', fontSize: '11px' }}>{m.MERCHANT_SHORT_CODE || m.ACCOUNT_ID}</td>

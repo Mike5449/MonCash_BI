@@ -1,4 +1,4 @@
-import { ChakraProvider, createSystem, defineConfig, defaultSystem } from "@chakra-ui/react"
+import { ChakraProvider, createSystem, defineConfig, defaultConfig } from "@chakra-ui/react"
 import { ColorModeProvider } from "./color-mode"
 
 const config = defineConfig({
@@ -37,7 +37,7 @@ const config = defineConfig({
   },
 })
 
-export const system = createSystem(defaultSystem, config)
+export const system = createSystem(defaultConfig, config)
 
 export function Provider(props: { children: React.ReactNode }) {
   return (

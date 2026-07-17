@@ -684,6 +684,13 @@ function renderRow(r: RegRow, i: number, loading: boolean, even: boolean) {
       </>
     )
   }
+  if (r.kind === 'header') {
+    return (
+      <tr key={i} style={{ borderTop: '1px solid var(--border-faint)' }}>
+        <td colSpan={3} style={{ ...regTdLabel, background: 'var(--surface-muted)', fontWeight: 700 }}>{r.label}</td>
+      </tr>
+    )
+  }
   // Single-row (no gender split)
   const footerExtra: React.CSSProperties = r.footer ? {
     fontWeight: 700,

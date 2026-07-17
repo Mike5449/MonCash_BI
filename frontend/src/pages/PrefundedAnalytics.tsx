@@ -1,11 +1,11 @@
 import { DashboardLayout } from "../components/Layout/DashboardLayout"
 import { usePrefundedAccounts, usePrefundedTransactions } from "../hooks/useAnalytics"
-import { Banknote, TrendingUp, History, MapPin, Search, Download } from "lucide-react"
+import { Banknote, TrendingUp, History, MapPin, Download } from "lucide-react"
 import "../premium.css"
 
 export default function PrefundedAnalytics() {
-  const { data: accounts, isLoading: loadingAccounts } = usePrefundedAccounts(100)
-  const { data: transactions, isLoading: loadingTXs } = usePrefundedTransactions(100)
+  const { data: accounts, isLoading: loadingAccounts } = usePrefundedAccounts({ limit: 100 })
+  const { data: transactions, isLoading: loadingTXs } = usePrefundedTransactions({ limit: 100 })
 
   return (
     <DashboardLayout>

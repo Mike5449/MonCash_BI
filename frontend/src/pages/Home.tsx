@@ -15,7 +15,7 @@ import {
 import { DashboardLayout } from "../components/Layout/DashboardLayout"
 import {
   useMtdByDepartment, useMtdByChannel, useMtdSnapshotByType,
-  useMonthlyTotals, useDailyTotals, useDailyStatsByChannel, useDailyStatsByType,
+  useMonthlyTotals, useDailyTotals, useDailyStatsByChannel,
   usePeriodAggregatesByDimension,
 } from "../hooks/useAnalytics"
 import "../premium.css"
@@ -89,7 +89,7 @@ export default function Home() {
   // Filtres pour les 4 line charts journaliers
   const [selectedProducts,    setSelectedProducts]    = useState<string[]>([])
   const [selectedDepartments, setSelectedDepartments] = useState<string[]>([])
-  const [selectedChannels,    setSelectedChannels]    = useState<string[]>([])
+  const [selectedChannels,    _setSelectedChannels]   = useState<string[]>([])
   // Visibility per-channel (toggleable in the channels tab)
   const [hiddenChannels, setHiddenChannels] = useState<Set<string>>(new Set())
 
@@ -200,13 +200,6 @@ export default function Home() {
     endDate:   dailyRange.end,
     channels:  selectedChannels.length > 0 ? selectedChannels : undefined,
     enabled:   tab === 'channels',
-  })
-
-  // Per-TR_TYPE daily breakdown — fetched uniquement quand on est sur l'onglet products
-  // ET que le modal Daily est ouvert. Sert à alimenter les donut charts du modal % Daily.
-  const dailyByType = useDailyStatsByType({
-    startDate: dailyRange.start,
-    endDate:   dailyRange.end,
   })
 
   // Pivot: list of channel names + array of { date, ch1: v, ch2: v, ... } per metric

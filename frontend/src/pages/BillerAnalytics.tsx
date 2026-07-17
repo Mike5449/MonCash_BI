@@ -1,11 +1,11 @@
 import { DashboardLayout } from "../components/Layout/DashboardLayout"
 import { useBillerAccounts, useBillerTransactions } from "../hooks/useAnalytics"
-import { Receipt, TrendingUp, ArrowRightLeft, Building2, ShieldCheck, Download } from "lucide-react"
+import { ArrowRightLeft, Building2, ShieldCheck, Download } from "lucide-react"
 import "../premium.css"
 
 export default function BillerAnalytics() {
-  const { data: billers, isLoading: loadingBillers } = useBillerAccounts(100)
-  const { data: transactions, isLoading: loadingTXs } = useBillerTransactions(100)
+  const { data: billers, isLoading: loadingBillers } = useBillerAccounts({ limit: 100 })
+  const { data: transactions, isLoading: loadingTXs } = useBillerTransactions({ limit: 100 })
 
   return (
     <DashboardLayout>
