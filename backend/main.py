@@ -17,7 +17,18 @@ from core.config import settings
 from core.exceptions import BaseAPIException, api_exception_handler
 from core.middleware import SecurityHeadersMiddleware
 from database import Base, SessionLocal, engine
-from routers import auth_router, user_router
+from routers.auth_router import router as auth_router
+from routers.user_router import router as user_router
+from routers.analytics_router import router as analytics_router
+from routers.customer_router import router as customer_router
+from routers.biller_router import router as biller_router
+from routers.merchant_router import router as merchant_router
+from routers.prefunded_router import router as prefunded_router
+from routers.imt_router import router as imt_router
+from routers.period_report_router import router as period_report_router
+from routers.id_card_router import router as id_card_router
+from routers.operations_router import router as operations_router
+from routers.cache_router import router as cache_router
 
 logger = logging.getLogger(__name__)
 
@@ -43,9 +54,9 @@ def _seed_rbac_if_needed() -> None:
 # ---------------------------------------------------------------------------
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Startup
-    Base.metadata.create_all(bind=engine)
-    _seed_rbac_if_needed()
+    # Startup - Disabled table creation for read-only analytics access
+    # Base.metadata.create_all(bind=engine)
+    # _seed_rbac_if_needed()
     yield
     # Shutdown (nothing to clean up)
 
@@ -61,27 +72,31 @@ limiter = Limiter(key_func=get_remote_address, default_limits=["200/minute"])
 TAGS_METADATA = [
     {
         "name": "auth",
-        "description": (
-            "Authentication endpoints. "
-            "Use **POST /token** to obtain an access token + refresh token. "
-            "Pass the access token as `Bearer <token>` in the `Authorization` header. "
-            "Use **POST /token/refresh** to rotate the access token without re-logging in."
-        ),
+        "description": "Authentication endpoints.",
     },
     {
         "name": "users",
-        "description": (
-            "User management. "
-            "**RBAC permissions required** — see each endpoint's summary for the needed permission. "
-            "\n\n| Role | Permissions |\n|---|---|\n"
-            "| `admin` | Full access |\n"
-            "| `manager` | Read, list, update self |\n"
-            "| `staff` | Read self, update self |"
-        ),
+        "description": "User management.",
     },
     {
-        "name": "monitoring",
-        "description": "Health check and operational endpoints.",
+        "name": "customers",
+        "description": "Customer registration audits and transaction history.",
+    },
+    {
+        "name": "billers",
+        "description": "Utility partner audits and collection logs.",
+    },
+    {
+        "name": "merchants",
+        "description": "mCom business partner audits and payment logs.",
+    },
+    {
+        "name": "prefunded",
+        "description": "Prefunded partner audits and settlement logs.",
+    },
+    {
+        "name": "analytics",
+        "description": "Global analytics, bulk processing, and administrative data tasks.",
     },
 ]
 
@@ -94,31 +109,13 @@ app = FastAPI(
     version="1.0.0",
     description=(
         "## Secure base system API\n\n"
-        "### Authentication flow\n"
-        "1. `POST /token` with `username` + `password` (form-data) → receive `access_token` & `refresh_token`\n"
-        "2. Click **Authorize** (🔒) above and enter: `Bearer <access_token>`\n"
-        "3. All protected endpoints will include the token automatically\n"
-        "4. When the access token expires, call `POST /token/refresh` to get a new one\n\n"
-        "### RBAC roles\n"
-        "| Role | Description |\n|---|---|\n"
-        "| `admin` | Full access to all resources |\n"
-        "| `manager` | Read + list users, update own profile |\n"
-        "| `staff` | Read + update own profile only |\n\n"
-        "### Security features\n"
-        "- JWT access tokens (30 min) + refresh tokens (7 days)\n"
-        "- Account lockout after 5 failed login attempts\n"
-        "- bcrypt password hashing\n"
-        "- Rate limiting: 200 req/min per IP\n"
-        "- Security headers on every response\n"
+        "Domain-driven architecture for MonCash BI auditing."
     ),
     openapi_tags=TAGS_METADATA,
-    # Uncomment the two lines below to disable docs in production:
-    # docs_url=None,
-    # redoc_url=None,
     swagger_ui_parameters={
-        "persistAuthorization": True,       # keep the token across page reloads
-        "displayRequestDuration": True,     # show request timing in the UI
-        "filter": True,                     # add a search box over endpoints
+        "persistAuthorization": True,
+        "displayRequestDuration": True,
+        "filter": True,
         "syntaxHighlight.theme": "monokai",
     },
     license_info={
@@ -133,7 +130,7 @@ app.state.limiter = limiter
 # Middleware — order matters: first added = outermost
 # ---------------------------------------------------------------------------
 
-# 1. Trusted hosts — rejects requests with unexpected Host headers
+# 1. Trusted hosts
 app.add_middleware(
     TrustedHostMiddleware,
     allowed_hosts=["localhost", "127.0.0.1", "*.yourdomain.com"],
@@ -174,8 +171,18 @@ async def global_exception_handler(request: Request, exc: Exception):
 # ---------------------------------------------------------------------------
 # Routers
 # ---------------------------------------------------------------------------
-app.include_router(user_router.router)
-app.include_router(auth_router.router)
+app.include_router(user_router)
+app.include_router(auth_router)
+app.include_router(analytics_router)
+app.include_router(customer_router)
+app.include_router(biller_router)
+app.include_router(merchant_router)
+app.include_router(prefunded_router)
+app.include_router(imt_router)
+app.include_router(period_report_router)
+app.include_router(id_card_router)
+app.include_router(operations_router)
+app.include_router(cache_router)
 
 
 # ---------------------------------------------------------------------------
@@ -193,7 +200,7 @@ def health_check():
 
 
 # ---------------------------------------------------------------------------
-# Customise the OpenAPI schema to add global security + better error models
+# Customise the OpenAPI schema
 # ---------------------------------------------------------------------------
 def custom_openapi():
     if app.openapi_schema:
@@ -207,7 +214,6 @@ def custom_openapi():
         tags=TAGS_METADATA,
     )
 
-    # Ensure the BearerAuth security scheme is present
     schema.setdefault("components", {}).setdefault("securitySchemes", {})
     schema["components"]["securitySchemes"]["BearerAuth"] = {
         "type": "http",
@@ -216,11 +222,9 @@ def custom_openapi():
         "description": "Paste your access token here (without the 'Bearer' prefix).",
     }
 
-    # Apply BearerAuth globally to every operation that doesn't opt out
     for path_item in schema.get("paths", {}).values():
         for operation in path_item.values():
             if isinstance(operation, dict):
-                # Skip the token endpoint itself
                 if "token" not in str(operation.get("operationId", "")):
                     operation.setdefault("security", [{"BearerAuth": []}])
 

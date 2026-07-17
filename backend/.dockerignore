@@ -1,0 +1,41 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Virtualenv (never ship the local venv into the image)
+venv/
+env/
+.venv/
+ENV/
+
+# Local envs / secrets — always provided at runtime via docker-compose or --env-file
+.env
+.env.*
+!.env.example
+
+# IDE / OS
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Test / dev artifacts that shouldn't end up in prod image
+tests/
+*.log
+alembic/versions/*.pyc
+
+# Docker artifacts themselves
+Dockerfile
+.dockerignore
+
+# Debug / scratch scripts (kept in repo for dev, not needed in the image)
+debug_*.py
+probe_*.py
+list_tables.py
+check_db_connection.py
+dump_openapi.py

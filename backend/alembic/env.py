@@ -15,8 +15,9 @@ import models.user  # noqa: F401 — register all models so autogenerate sees th
 # Alembic Config object
 config = context.config
 
-# Override sqlalchemy.url with the value from our settings
-config.set_main_option("sqlalchemy.url", settings.DATABASE_URL)
+# Override sqlalchemy.url with a dummy scheme to allow Alembic to read the URL, 
+# although we will use our custom engine directly for the connection if possible.
+config.set_main_option("sqlalchemy.url", "databricks://")
 
 # Logging
 if config.config_file_name is not None:
@@ -38,11 +39,9 @@ def run_migrations_offline() -> None:
 
 
 def run_migrations_online() -> None:
-    connectable = engine_from_config(
-        config.get_section(config.config_ini_section, {}),
-        prefix="sqlalchemy.",
-        poolclass=pool.NullPool,
-    )
+    # Use our configured engine directly instead of creating one from the config
+    from database import engine as connectable
+
     with connectable.connect() as connection:
         context.configure(connection=connection, target_metadata=target_metadata)
         with context.begin_transaction():

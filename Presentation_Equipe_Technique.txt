@@ -1,0 +1,356 @@
+================================================================================
+  MONCASH BI ANALYTICS PORTAL — PRESENTATION TECHNIQUE
+  Digicel Caribbean Ltd
+  Duree cible : 20-25 min + Q&A
+================================================================================
+
+
+--------------------------------------------------------------------------------
+1. INTRODUCTION & CONTEXTE  (2 min)
+--------------------------------------------------------------------------------
+
+"Bonjour a tous. Aujourd'hui je vais vous presenter le MonCash BI Analytics
+Portal, une plateforme web interne que j'ai developpee pour donner aux equipes
+Business, Operations, Compliance et Produit un acces direct, structure et
+securise aux donnees du Mobile Financial Service MonCash."
+
+Points a mentionner :
+  - Digicel Caribbean Ltd — departement Data / BI Haiti
+  - Public cible : Analystes BI, Ops, Marketing, Compliance
+  - Donnees sous-jacentes : Databricks SQL warehouse
+    (transactions MFS, KYC, agents, marchands, billers, prefunded, IMT...)
+  - Etat actuel : Prototype fonctionnel pret pour environnement de production
+
+
+--------------------------------------------------------------------------------
+2. LE PROBLEME RESOLU  (3 min)
+--------------------------------------------------------------------------------
+
+"Avant ce portail, chaque question business demandait un aller-retour manuel
+avec l'equipe data : une requete SQL, un export Excel, des tableaux croises
+dynamiques faits a la main. Chaque analyste avait son propre 'recueil de
+requetes' — pas de source de verite partagee. Le temps entre 'j'ai une
+question' et 'j'ai une reponse' se comptait en heures ou en jours."
+
+Ce que le portail apporte :
+
+  AVANT                                       APRES
+  -----                                       -----
+  Requetes SQL ad-hoc dispersees              Un portail unique, une source
+                                              de verite
+
+  Excel manuel avec pivots faits a la main    Tables pivot pre-calculees,
+                                              exportables en 1 clic
+
+  Comparaisons WoW / MoM refaites             Snapshots automatiques (semaine
+  a chaque fois                               derniere, mois dernier, MTD)
+
+  Acces direct SQL = risque de requetes       Endpoints optimises, cache
+  lourdes                                     Redis, throttling
+
+  Pas de tracabilite des acces                RBAC, JWT, audit trail
+
+  Verification KYC manuelle des cartes        Scanner integre (OCR Tesseract
+  d'identite                                  + parseur MRZ)
+
+
+--------------------------------------------------------------------------------
+3. FONCTIONNALITES PRINCIPALES  (4 min)
+--------------------------------------------------------------------------------
+
+Presentez les grands modules — pas besoin de tout detailler, juste montrer
+l'etendue.
+
+CUSTOMER ANALYTICS
+  - Accounts List (filtres : status, wallet tier, ID quality, adresse, IMT,
+    DOB / Age...)
+  - Active Customers, Churn 30 / 60 / 90, Custom Churn
+  - Daily & MTD Stats PAR TYPE / DEPARTEMENT / CANAL
+    (tables pivot avec onglets metriques, indicateurs de tendance,
+     filtre jour de la semaine)
+  - Subs Dashboard avec chart interactif dans un modal
+  - Transactions journalieres
+
+MERCHANT / BILLER / PREFUNDED / IMT
+  - Annuaires complets avec filtres et pagination
+  - Transactions par entite
+  - Stats mensuelles
+
+SNAPSHOTS
+  - WoW (Week-over-Week) par TR_TYPE
+  - MoM (Month-over-Month) MTD par TR_TYPE
+  - Par departement / canal / bank wallet
+  - Toujours avec exports Excel
+
+OPERATIONS
+  - Bulk transfer & Customer Dormant
+  - E-money Withdrawal / Deposit avec classification automatique des comptes
+    (Merchant / Agent / Biller / Prefunded / Payroll / Other)
+    — decision basee sur LEFT JOIN avec la table d'audit
+
+BUSINESS TOOLS
+  - File Verification (upload CSV -> enrichissement)
+  - ID Card Scanner (OCR Tesseract + MRZ parser conforme ICAO 9303)
+  - Transaction History, Agent OTC
+
+CHATBOT MONCASH ASSISTANT  (drawer deja en place, backend a connecter)
+  - Interface prete, animation "typing" a la ChatGPT
+  - Prochaine etape : connexion a un LLM pour requetes en langage naturel
+
+HOME DASHBOARD
+  - KPIs globaux + chart circulaire dans un modal
+
+SECURITE & ADMINISTRATION
+  - Login JWT (access + refresh tokens)
+  - RBAC (roles, permissions par module)
+  - Rate limiting, brute-force protection
+  - Cache Redis partage, bouton "Clear Cache" dans la nav
+
+
+--------------------------------------------------------------------------------
+4. DEMO LIVE SUGGEREE  (3-4 min)
+--------------------------------------------------------------------------------
+
+Ne montrez que 3-4 pages — assez pour illustrer sans perdre l'audience.
+
+SEQUENCE RECOMMANDEE :
+
+  1. HOME
+       Donut chart + drill-down modal (1 min)
+       > "Voila l'entree du portail. Un coup d'oeil sur les indicateurs
+          du jour."
+
+  2. CUSTOMERS · DAILY STATS BY TYPE  (1 min)
+       - Cliquer sur les onglets Subscribers / Volume / Value / Revenue
+       - Filtrer par jour de la semaine
+       - Montrer les indicateurs de tendance (fleches vertes / rouges)
+       > "Une pivot table dynamique, exportable en Excel en 1 clic."
+
+  3. OPERATIONS · E-MONEY TRANSACTIONS  (1 min)
+       - Montrer la classification automatique
+         Biller / Merchant / Agent / Payroll
+       - Filtrer par Payroll
+       > "Le portail identifie automatiquement le type de contrepartie
+          via JOIN avec l'audit des comptes."
+
+  4. CHATBOT ASSISTANT  (30 sec)
+       - Ouvrir le drawer
+       - Montrer l'animation de typing
+       > "L'interface est prete. Le backend LLM sera connecte a la
+          prochaine phase."
+
+
+--------------------------------------------------------------------------------
+5. STACK TECHNOLOGIQUE  (2 min)
+--------------------------------------------------------------------------------
+
+FRONTEND
+  - React 19 + TypeScript + Vite (bundler moderne, ultra-rapide en dev)
+  - React Query v5 (@tanstack/react-query) pour la gestion du cache client
+  - React Router 7 pour la navigation SPA
+  - Recharts pour les graphiques, lucide-react pour les icones
+  - Design system maison base sur des design tokens CSS
+
+BACKEND
+  - Python 3.11 + FastAPI (framework async performant, OpenAPI natif)
+  - SQLAlchemy + Databricks SQL Connector pour l'acces aux donnees
+  - Pydantic Settings pour la configuration
+  - slowapi pour le rate limiting
+  - JWT (python-jose) + bcrypt / passlib pour l'auth
+  - pytesseract + mrz + Pillow pour l'OCR des cartes d'identite
+
+CACHE & PERFORMANCE
+  - Redis (cache partage multi-workers, TTL par fraicheur)
+  - Cache en memoire en fallback si Redis indisponible
+
+DONNEES
+  - Databricks SQL warehouse (Azure)
+  - Tables gr_dgc_dwh_prd.ods_dl.mfs_mobile_banking_audit,
+    ht_location, etc.
+
+DEPLOIEMENT
+  - Docker + Docker Compose (3 conteneurs : backend, frontend / nginx, redis)
+  - Nginx en reverse proxy + serveur de statique
+  - Caddy en frontal pour TLS / HTTPS automatique (Let's Encrypt)
+
+
+--------------------------------------------------------------------------------
+6. ARCHITECTURE — POINTS-CLES  (2 min)
+--------------------------------------------------------------------------------
+
+  - Une seule entree reseau (port 443) — backend et Redis internes au
+    reseau Docker
+
+  - Same-origin — nginx proxie /api/* -> backend, pas de CORS a gerer
+
+  - Read-only cote Databricks — aucune ecriture, uniquement des SELECT
+
+  - Trois conteneurs Docker isoles :
+      * frontend  : nginx + SPA React (static)
+      * backend   : FastAPI + Python
+      * redis     : cache partage
+
+  - Les containers communiquent via un reseau Docker prive interne
+
+
+--------------------------------------------------------------------------------
+7. RECOMMANDATIONS POUR LA MISE EN PRODUCTION  (5 min)
+--------------------------------------------------------------------------------
+
+============================
+RECOMMANDATION 1 · AZURE SERVICE PRINCIPAL (auth Python)
+============================
+
+"Actuellement, le backend utilise DefaultAzureCredential d'Azure Identity, qui
+essaie plusieurs methodes en cascade : token en cache, Azure CLI local, browser
+interactif. AUCUNE de ces methodes ne marche dans un container Linux en
+production — pas d'interface graphique, pas d'Azure CLI installe, pas
+d'utilisateur logue."
+
+La solution : creer un Service Principal Azure AD dedie a l'application,
+avec juste les permissions necessaires pour acceder au Databricks SQL
+warehouse.
+
+Ce qu'il faut demander a l'equipe Azure / IT :
+  1. Creation d'une App Registration dans Azure AD
+  2. Generation d'un client secret (valable 24 mois, a faire tourner)
+  3. Attribution des permissions Databricks (user_impersonation)
+  4. Ajout du SP dans les ACL du SQL warehouse
+
+3 variables a mettre dans .env :
+  AZURE_TENANT_ID
+  AZURE_CLIENT_ID
+  AZURE_CLIENT_SECRET
+
+DefaultAzureCredential les detecte automatiquement — aucun changement de
+code necessaire.
+
+Alternative simple : Databricks Personal Access Token (PAT) — 1 seule
+variable, mais liee a un utilisateur.
+
+
+============================
+RECOMMANDATION 2 · SERVEUR LINUX DEDIE
+============================
+
+Specifications minimales requises :
+
+  Ressource     Spec
+  ---------     ----
+  OS            Ubuntu Server 22.04 LTS ou 24.04 LTS
+  CPU           4 vCPU (x86_64)
+  RAM           8 GB
+  Disque        100 GB SSD
+  Reseau        100 Mbps symetrique
+  GPU           Aucun (sauf si on veut du LLM local)
+
+Ports a ouvrir (entrant) :
+  22   - SSH (cle uniquement, pas de mot de passe)
+  80   - Redirect HTTPS
+  443  - HTTPS
+
+Sortie autorisee :
+  *.azuredatabricks.net:443         (requetes SQL)
+  login.microsoftonline.com:443     (Azure AD tokens)
+  api.anthropic.com:443             (futur chatbot)
+  registry-1.docker.io:443          (pull images Docker)
+
+Logiciels sur l'hote :
+  - Docker Engine 24+
+  - Docker Compose plugin 2.20+
+  - Caddy (TLS automatique via Let's Encrypt)
+  - UFW (firewall)
+  - fail2ban (protection brute-force SSH)
+  - unattended-upgrades (patches securite auto)
+
+
+============================
+CE QU'IL FAUT FOURNIR A L'EQUIPE DEVOPS POUR LANCER
+============================
+
+  [ ] Un VM Linux avec les specs ci-dessus
+  [ ] Un nom de domaine (ex. bi.moncash.digicel.ht) + acces DNS
+  [ ] Le Service Principal Azure (3 credentials)
+  [ ] Acces Git (SSH deploy key ou personal token)
+  [ ] Autorisation firewall pour les domaines sortants
+
+Une fois ces prerequis en place, le deploiement se resume a 3 commandes :
+
+  git clone <repo> /opt/moncash-bi
+  cp .env.example .env && vim .env
+  docker compose up -d --build
+
+
+--------------------------------------------------------------------------------
+8. ROADMAP & PROCHAINES ETAPES  (2 min)
+--------------------------------------------------------------------------------
+
+PHASE ACTUELLE · PROTOTYPE FONCTIONNEL
+  - Tous les modules BI operationnels
+  - Interface complete et responsive
+  - Exports Excel fonctionnels
+  - OCR ID Card integre
+
+PHASE SUIVANTE · MISE EN PRODUCTION
+  1. Provisionnement du serveur Linux
+  2. Creation du Service Principal Azure
+  3. Dockerisation deja prete, deploiement en 1 commande
+  4. Configuration TLS via Caddy
+  5. Onboarding des premiers utilisateurs (RBAC deja en place)
+
+PHASE FUTURE · CHATBOT MONCASH ASSISTANT
+  - Backend LLM a connecter (Anthropic Claude via API)
+  - Tool-calling sur les endpoints existants
+  - Glossaire metier MonCash injecte en system prompt
+  - Decomposition automatique des questions "why"
+  - Estimation : 2-3 semaines de developpement pour un MVP fonctionnel
+
+
+--------------------------------------------------------------------------------
+9. RECAP — CE QU'IL FAUT RETENIR
+--------------------------------------------------------------------------------
+
+CE QUI EST PRET :
+  [OK] Application full-stack fonctionnelle
+  [OK] Design system coherent
+  [OK] Configuration Docker + Docker Compose
+  [OK] Documentation de deploiement
+  [OK] Securite (JWT + RBAC + rate limiting + read-only DB)
+
+CE QUI EST DEMANDE POUR ALLER EN PRODUCTION :
+  [!] Un Service Principal Azure (3 credentials pour l'auth Databricks)
+  [!] Un serveur Linux (Ubuntu 22.04 / 24.04 LTS, 4 vCPU / 8 GB / 100 GB SSD)
+  [!] Un nom de domaine et acces DNS
+
+CE QUI SUIT :
+  [->] Chatbot LLM (2-3 semaines de developpement supplementaire)
+
+
+--------------------------------------------------------------------------------
+10. CONSEILS DE PRESENTATION
+--------------------------------------------------------------------------------
+
+  1. Ne lisez pas les slides — parlez naturellement, servez-vous des
+     points comme guide.
+
+  2. La demo doit etre fluide — preparez les donnees a l'avance, evitez
+     les rechargements longs.
+
+  3. Insistez sur les 2 demandes concretes (SP Azure + serveur Linux) —
+     c'est votre "call to action".
+
+  4. Anticipez les questions :
+       - "Combien ca coute a heberger ?"
+       - "Combien d'utilisateurs peut-il supporter ?"
+       - "Comment gere-t-on les mises a jour ?"
+       - "Est-ce que les donnees sortent de notre infra ?"
+       - "Quel est le plan de reprise en cas de panne ?"
+
+  5. Ayez un plan B pour la demo si le reseau lache — screenshots des
+     pages cles dans les slides.
+
+
+================================================================================
+                              FIN DE LA PRESENTATION
+                                 Bonne chance !
+================================================================================

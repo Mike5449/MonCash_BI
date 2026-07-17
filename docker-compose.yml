@@ -1,17 +1,118 @@
-version: '3.8'
-
+# ─────────────────────────────────────────────────────────────────────────────
+# MonCash BI Portal — Production stack
+#
+# Services:
+#   frontend  : nginx serving the Vite bundle + reverse-proxying /api -> backend
+#   backend   : FastAPI (Databricks SQL Connector, Azure Identity)
+#   redis     : shared cache (optional but recommended if UVICORN_WORKERS > 1
+#               or you plan to run multiple backend replicas)
+#
+# Deploy on a Linux host:
+#   1. cp .env.example .env    (fill in secrets / Databricks / Azure SP)
+#   2. docker compose build
+#   3. docker compose up -d
+#
+# Reach the app at http://<server>:${WEB_PORT:-80}
+# ─────────────────────────────────────────────────────────────────────────────
 services:
-  db:
-    image: postgres:15-alpine
-    restart: always
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    image: moncash/bi-backend:latest
+    container_name: bi-backend
+    restart: unless-stopped
+    depends_on:
+      - redis
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: root
-      POSTGRES_DB: app_base_system
+      # ── Databricks ─────────────────────────────────────────────────────────
+      DATABRICKS_SERVER_HOSTNAME: ${DATABRICKS_SERVER_HOSTNAME}
+      DATABRICKS_HTTP_PATH:       ${DATABRICKS_HTTP_PATH}
+      ANALYTICS_INPUT_PATH:       ${ANALYTICS_INPUT_PATH}
+
+      # ── Azure Service Principal (picked up by DefaultAzureCredential) ─────
+      # Required on non-Azure hosts; on Azure-hosted VMs you can rely on
+      # managed identity and leave these unset.
+      AZURE_TENANT_ID:            ${AZURE_TENANT_ID}
+      AZURE_CLIENT_ID:            ${AZURE_CLIENT_ID}
+      AZURE_CLIENT_SECRET:        ${AZURE_CLIENT_SECRET}
+
+      # ── JWT — MUST be strong random values in production ──────────────────
+      SECRET_KEY:                 ${SECRET_KEY}
+      REFRESH_SECRET_KEY:         ${REFRESH_SECRET_KEY}
+      ACCESS_TOKEN_EXPIRE_MINUTES: ${ACCESS_TOKEN_EXPIRE_MINUTES:-30}
+      REFRESH_TOKEN_EXPIRE_DAYS:  ${REFRESH_TOKEN_EXPIRE_DAYS:-7}
+
+      # ── CORS — same-origin thanks to nginx reverse proxy, but keep this
+      # aligned with any external host that might call the API directly.
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost}
+
+      # ── Cache backend ─────────────────────────────────────────────────────
+      CACHE_BACKEND: redis
+      REDIS_URL:     redis://redis:6379/0
+      CACHE_ENABLED: "true"
+      CACHE_DEFAULT_TTL: ${CACHE_DEFAULT_TTL:-600}
+
+      # ── Uvicorn workers ───────────────────────────────────────────────────
+      UVICORN_WORKERS: ${UVICORN_WORKERS:-2}
+    expose:
+      - "8000"     # only reachable from other compose services (frontend/nginx)
+    networks:
+      - bi-net
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "5"
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        # Frontend is built to hit /api on the same origin — nginx handles the
+        # rewrite/proxy to the backend service inside the compose network.
+        VITE_API_BASE_URL: /api
+    image: moncash/bi-frontend:latest
+    container_name: bi-frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
     ports:
-      - "5432:5432"
+      - "${WEB_PORT:-80}:80"
+    networks:
+      - bi-net
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "5"
+
+  redis:
+    image: redis:7-alpine
+    container_name: bi-redis
+    restart: unless-stopped
+    command:
+      - "redis-server"
+      - "--maxmemory"
+      - "512mb"
+      - "--maxmemory-policy"
+      - "allkeys-lru"
+      - "--appendonly"
+      - "no"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - redis_data:/data
+    networks:
+      - bi-net
+    logging:
+      driver: json-file
+      options:
+        max-size: "5m"
+        max-file: "3"
 
 volumes:
-  postgres_data:
+  redis_data:
+
+networks:
+  bi-net:
+    driver: bridge

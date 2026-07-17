@@ -5,8 +5,10 @@ from typing import List
 class Settings(BaseSettings):
     PROJECT_NAME: str = "App Base System"
 
-    # Database
-    DATABASE_URL: str
+    # Databricks
+    DATABRICKS_SERVER_HOSTNAME: str
+    DATABRICKS_HTTP_PATH: str
+    ANALYTICS_INPUT_PATH: str
 
     # JWT — no defaults, must be set in .env
     SECRET_KEY: str
@@ -22,6 +24,13 @@ class Settings(BaseSettings):
     MAX_LOGIN_ATTEMPTS: int = 5
     ACCOUNT_LOCKOUT_MINUTES: int = 15
 
+    # Result cache (read-only Databricks analytics)
+    CACHE_ENABLED: bool = True
+    CACHE_DEFAULT_TTL: int = 3600  # seconds (10 min)
+    # "memory" = per-process; "redis" = shared across instances (multi-instance)
+    CACHE_BACKEND: str = "memory"
+    REDIS_URL: str = "redis://localhost:6379/0"
+
     @property
     def cors_origins_list(self) -> List[str]:
         return [o.strip() for o in self.CORS_ORIGINS.split(",") if o.strip()]
@@ -29,6 +38,7 @@ class Settings(BaseSettings):
     class Config:
         case_sensitive = True
         env_file = ".env"
+        extra = "ignore"
 
 
 settings = Settings()

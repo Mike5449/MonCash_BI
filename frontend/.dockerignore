@@ -1,0 +1,22 @@
+node_modules/
+dist/
+.vite/
+coverage/
+
+# Local envs
+.env
+.env.*
+!.env.example
+
+# IDE / OS
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Test / dev artifacts
+tests/
+*.log
+
+Dockerfile
+.dockerignore

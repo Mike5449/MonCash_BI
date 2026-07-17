@@ -1,7 +1,10 @@
 fastapi
 uvicorn[standard]
 sqlalchemy
-psycopg2-binary
+databricks-sql-connector
+sqlalchemy-databricks
+azure-identity
+pandas
 pydantic-settings
 python-dotenv
 alembic
@@ -13,3 +16,16 @@ python-multipart
 httpx
 slowapi
 limits
+watchdog
+openpyxl
+redis
+# ID Card OCR (Business Tools > ID Card Scanner)
+# - pytesseract : wrapper Python pour le binaire Tesseract.
+#                 100% offline une fois installé, aucun download runtime.
+#                 Win : installer UB-Mannheim. Linux : apt install tesseract-ocr tesseract-ocr-fra
+# - mrz         : parseur ICAO 9303 (TD1/TD2/TD3) avec validation déterministe des
+#                 checksums. Pure Python, aucune dépendance externe.
+# - Pillow      : preprocessing image (orientation EXIF, gris, contraste).
+pytesseract
+mrz
+Pillow
