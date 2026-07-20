@@ -130,7 +130,7 @@ export function Sidebar() {
     { label: "File Verification", to: "/enrich", group: "Tools" },
     { label: "Transaction History", to: "/tools/transaction-history", group: "Tools" },
     { label: "Agent OTC", to: "/tools/agent-otc", group: "Tools" },
-    { label: "Period Report", to: "/tools/period-report", group: "Tools" },
+    { label: "BRH Report", to: "/tools/period-report", group: "Tools" },
     { label: "ID Card Scanner", to: "/tools/id-card-scanner", group: "Tools" },
   ]), [])
 
@@ -271,7 +271,7 @@ export function Sidebar() {
             <NavItem to="/enrich" icon={Sparkles} active={location.pathname === "/enrich"}>File Verification</NavItem>
             <NavItem to="/tools/transaction-history" icon={History} active={location.pathname === "/tools/transaction-history"}>Transaction History</NavItem>
             <NavItem to="/tools/agent-otc" icon={Users} active={location.pathname === "/tools/agent-otc"}>Agent OTC</NavItem>
-            <NavItem to="/tools/period-report" icon={FileBarChart} active={location.pathname === "/tools/period-report"}>Period Report</NavItem>
+            <NavItem to="/tools/period-report" icon={FileBarChart} active={location.pathname === "/tools/period-report"}>BRH Report</NavItem>
             <NavItem to="/tools/id-card-scanner" icon={IdCard} active={location.pathname === "/tools/id-card-scanner"}>ID Card Scanner</NavItem>
           </>
         )}
