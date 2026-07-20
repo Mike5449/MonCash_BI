@@ -354,6 +354,9 @@ REFRESH_TOKEN_EXPIRE_DAYS=7
 # ── CORS ─────────────────────────────────────────────────────────
 CORS_ORIGINS=http://${SERVER_IP},http://$(hostname),http://localhost
 
+# ── Trusted hosts (Host header allow-list) ──────────────────────
+ALLOWED_HOSTS=$(hostname),${SERVER_IP},localhost,127.0.0.1
+
 # ── Cache TTL (10 min) ──────────────────────────────────────────
 CACHE_DEFAULT_TTL=600
 
