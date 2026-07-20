@@ -15,16 +15,15 @@ const todayMinus1 = () => {
 
 // Slightly darker green/red used across snapshot pills — the design-system
 // -soft variants are too pale for high-density comparison cards.
-const UP_BG   = '#bbf7d0'   // green-200
-const UP_FG   = '#166534'   // green-800
-const DOWN_BG = '#fecaca'   // red-200
-const DOWN_FG = '#991b1b'   // red-800
-// Re-exported for the Cell components inside each snapshot page so they use
-// the same darker palette as the pills defined here.
+// Trend palette shared by every snapshot Cell — medium tones (Tailwind -200 bg
+// / -800 fg) so the diff/var pills read clearly even at small sizes.
 export const SNAPSHOT_TREND = {
-  UP_BG, UP_FG, DOWN_BG, DOWN_FG,
-  FLAT_BG: 'var(--surface-muted)',
-  FLAT_FG: 'var(--text-tertiary)',
+  UP_BG:   '#bbf7d0',   // green-200
+  UP_FG:   '#166534',   // green-800
+  DOWN_BG: '#fecaca',   // red-200
+  DOWN_FG: '#991b1b',   // red-800
+  FLAT_BG: '#fef08a',   // yellow-200 (neutral movement is highlighted, not hidden)
+  FLAT_FG: '#854d0e',   // yellow-800
 } as const
 
 // ───── HEADER ─────────────────────────────────────────────────────────────────
