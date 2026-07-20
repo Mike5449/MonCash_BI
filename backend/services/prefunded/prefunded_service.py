@@ -6,9 +6,14 @@ from repositories.prefunded.prefunded_transaction_repository import PrefundedTra
 
 class PrefundedService:
     @staticmethod
-    def get_accounts(db: Session, limit: int = 100) -> List[Dict[str, Any]]:
+    def get_accounts(
+        db: Session,
+        limit: int = 100,
+        start_date: Optional[str] = None,
+        end_date: Optional[str] = None,
+    ) -> List[Dict[str, Any]]:
         repository = PrefundedRepository(db)
-        return repository.get_prefunded_accounts(limit=limit)
+        return repository.get_prefunded_accounts(limit=limit, start_date=start_date, end_date=end_date)
 
     @staticmethod
     def get_transactions(

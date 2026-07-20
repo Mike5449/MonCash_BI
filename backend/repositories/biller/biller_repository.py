@@ -1,5 +1,9 @@
+import re
 from sqlalchemy import text
 from typing import List, Dict, Any, Optional
+
+_YYYYMMDD = re.compile(r"^\d{8}$")
+
 
 class BillerRepository:
     def __init__(self, db):
@@ -8,27 +12,48 @@ class BillerRepository:
     def _get_latest_date_subquery(self):
         return "(SELECT MAX(TO_DATE(DATE_CODE,'yyyyMMdd')) FROM gr_dgc_dwh_prd.ods_dl.mfs_mobile_banking_audit)"
 
-    def get_biller_accounts(self, limit: int = 100) -> List[Dict[str, Any]]:
+    def get_biller_accounts(
+        self,
+        limit: int = 100,
+        start_date: Optional[str] = None,
+        end_date: Optional[str] = None,
+    ) -> List[Dict[str, Any]]:
+        for d in (start_date, end_date):
+            if d and not _YYYYMMDD.match(d):
+                raise ValueError(f"Invalid date format {d!r}, expected yyyyMMdd (8 digits)")
+
+        if start_date and end_date:
+            date_clause = (
+                f"AND to_date(DATE_CODE,'yyyyMMdd') "
+                f"BETWEEN to_date('{start_date}','yyyyMMdd') AND to_date('{end_date}','yyyyMMdd')"
+            )
+        elif start_date:
+            date_clause = f"AND to_date(DATE_CODE,'yyyyMMdd') >= to_date('{start_date}','yyyyMMdd')"
+        elif end_date:
+            date_clause = f"AND to_date(DATE_CODE,'yyyyMMdd') <= to_date('{end_date}','yyyyMMdd')"
+        else:
+            date_clause = f"AND to_date(DATE_CODE,'yyyyMMdd') = {self._get_latest_date_subquery()}"
+
         query = f"""
         SELECT *
         FROM (
             SELECT DISTINCT
-                DATE_CODE,       
+                DATE_CODE,
                 IDENTITYMSISDN AS ACCOUNT_ID,
                 ORGANIZATIONSHORTCODE AS BILLER_SHORT_CODE,
-                UNIQUESYSTEMID AS IDENTITY_ID ,
-                IDENTITYNAME AS BILLER_NAME ,
-                DEPARTMENT ,
-                ACCOUNTGLCODE AS ACCOUNT_GL_CODE ,
-                split(SEGMENT ,"#")[0] AS BILLER_TYPE ,
-                split(CHARGEPROFILE," ")[4] AS FEE ,
+                UNIQUESYSTEMID AS IDENTITY_ID,
+                IDENTITYNAME AS BILLER_NAME,
+                DEPARTMENT,
+                ACCOUNTGLCODE AS ACCOUNT_GL_CODE,
+                split(SEGMENT ,"#")[0] AS BILLER_TYPE,
+                split(CHARGEPROFILE," ")[4] AS FEE,
                 ROW_NUMBER() OVER (
                     PARTITION BY ORGANIZATIONSHORTCODE
                     ORDER BY to_date(LASTMODIFIED,'yyyyMMddHHmmss') DESC
                 ) AS rn
             FROM gr_dgc_dwh_prd.ods_dl.mfs_mobile_banking_audit
-            WHERE PRODUCTS like '%[Utility Product]%' 
-            AND to_date(DATE_CODE,'yyyyMMdd') = {self._get_latest_date_subquery()}
+            WHERE PRODUCTS like '%[Utility Product]%'
+            {date_clause}
         ) a
         WHERE a.rn = 1
         LIMIT {limit}

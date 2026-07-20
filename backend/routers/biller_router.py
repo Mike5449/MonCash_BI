@@ -35,9 +35,11 @@ router = APIRouter(
 @router.get("/accounts", summary="Get Biller accounts")
 def get_biller_accounts(
     limit: int = Query(100),
+    start_date: Optional[str] = Query(None, description="Registration date lower bound, yyyyMMdd"),
+    end_date: Optional[str] = Query(None, description="Registration date upper bound, yyyyMMdd"),
     db: Session = Depends(get_db)
 ):
-    return BillerService.get_accounts(db, limit)
+    return BillerService.get_accounts(db, limit, start_date, end_date)
 
 
 @router.get("/transactions", summary="Get Biller transactions (Customer Bill Payment)")

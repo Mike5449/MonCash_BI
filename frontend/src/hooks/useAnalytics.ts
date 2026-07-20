@@ -548,11 +548,13 @@ export const useCustomerMTDStatsByDay = (options: { trType?: string, msisdns?: s
   })
 }
 
-export const useBillerAccounts = (options: { limit?: number } = {}) => {
+export const useBillerAccounts = (options: { limit?: number, startDate?: string, endDate?: string } = {}) => {
   return useQuery({
     queryKey: ["biller-accounts", options],
     queryFn: () => BillerService.getAccounts(
-      options.limit || 100
+      options.limit || 100,
+      options.startDate,
+      options.endDate,
     )
   })
 }
@@ -602,11 +604,13 @@ export const useBillerTransactionsSummary = (options: { startDate?: string, endD
   })
 }
 
-export const usePrefundedAccounts = (options: { limit?: number } = {}) => {
+export const usePrefundedAccounts = (options: { limit?: number, startDate?: string, endDate?: string } = {}) => {
   return useQuery({
     queryKey: ["prefunded-accounts", options],
     queryFn: () => PrefundedService.getAccounts(
-      options.limit || 100
+      options.limit || 100,
+      options.startDate,
+      options.endDate,
     )
   })
 }

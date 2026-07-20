@@ -5,13 +5,17 @@ import { request as __request } from '../core/request';
 
 export class BillerService {
     public static getAccounts(
-        limit: number = 100
+        limit: number = 100,
+        startDate?: string,
+        endDate?: string,
     ): CancelablePromise<Array<any>> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/billers/accounts',
             query: {
-                'limit': limit
+                'limit':      limit,
+                'start_date': startDate,
+                'end_date':   endDate,
             },
         });
     }

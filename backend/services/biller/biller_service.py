@@ -6,9 +6,14 @@ from repositories.biller.biller_transaction_repository import BillerTransactionR
 
 class BillerService:
     @staticmethod
-    def get_accounts(db: Session, limit: int = 100) -> List[Dict[str, Any]]:
+    def get_accounts(
+        db: Session,
+        limit: int = 100,
+        start_date: Optional[str] = None,
+        end_date: Optional[str] = None,
+    ) -> List[Dict[str, Any]]:
         repository = BillerRepository(db)
-        return repository.get_biller_accounts(limit=limit)
+        return repository.get_biller_accounts(limit=limit, start_date=start_date, end_date=end_date)
 
     @staticmethod
     def get_transactions(
