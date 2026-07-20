@@ -1,0 +1,1150 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MonCash BI Portal — Guide de Déploiement IT</title>
+<style>
+:root {
+  --brand: #E31B23;
+  --brand-dark: #a11117;
+  --brand-soft: #fdd2d4;
+  --bg: #ffffff;
+  --bg-subtle: #f7f9fc;
+  --bg-code: #1e293b;
+  --bg-sidebar: #f8fafc;
+  --text: #0f172a;
+  --text-soft: #475569;
+  --text-muted: #94a3b8;
+  --border: #e2e8f0;
+  --border-soft: #f1f5f9;
+  --accent-green: #16a34a;
+  --accent-amber: #d97706;
+  --accent-blue: #3b82f6;
+  --code-string: #10b981;
+  --code-keyword: #f472b6;
+  --code-comment: #94a3b8;
+  --code-cmd: #93c5fd;
+  --code-var: #fbbf24;
+  --shadow: 0 1px 3px rgba(15,23,42,0.06), 0 1px 2px rgba(15,23,42,0.04);
+  --shadow-lg: 0 4px 12px rgba(15,23,42,0.08), 0 2px 4px rgba(15,23,42,0.06);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; scroll-padding-top: 80px; }
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+  font-size: 15px;
+  line-height: 1.65;
+  color: var(--text);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+}
+.wrapper {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  min-height: 100vh;
+  max-width: 1440px;
+  margin: 0 auto;
+}
+/* ── SIDEBAR ── */
+aside {
+  background: var(--bg-sidebar);
+  border-right: 1px solid var(--border);
+  padding: 24px 20px;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+}
+aside .brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-bottom: 20px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid var(--border);
+}
+aside .brand svg { flex-shrink: 0; }
+aside .brand h1 {
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+  color: var(--text);
+}
+aside .brand .subtitle {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-top: 2px;
+}
+aside nav h3 {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin: 20px 0 10px 12px;
+}
+aside nav ol {
+  list-style: none;
+}
+aside nav li a {
+  display: block;
+  padding: 6px 12px;
+  color: var(--text-soft);
+  text-decoration: none;
+  border-radius: 6px;
+  font-size: 13.5px;
+  font-weight: 500;
+  transition: all 0.15s;
+  border-left: 2px solid transparent;
+  margin-bottom: 1px;
+}
+aside nav li a:hover {
+  background: var(--brand-soft);
+  color: var(--brand-dark);
+  border-left-color: var(--brand);
+}
+aside nav .num {
+  display: inline-block;
+  width: 22px;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  font-size: 11.5px;
+}
+/* ── MAIN CONTENT ── */
+main {
+  padding: 40px 60px 80px;
+  max-width: 900px;
+  min-width: 0;
+}
+main > header {
+  padding-bottom: 32px;
+  margin-bottom: 40px;
+  border-bottom: 3px solid var(--brand);
+}
+main > header .kicker {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--brand);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+main > header h1 {
+  font-size: 34px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  color: var(--text);
+  margin-bottom: 16px;
+}
+main > header .meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+main > header .meta strong {
+  color: var(--text-soft);
+  font-weight: 600;
+}
+main > header .callout {
+  margin-top: 24px;
+  padding: 16px 20px;
+  background: var(--bg-subtle);
+  border-left: 3px solid var(--brand);
+  border-radius: 4px;
+  font-size: 14px;
+  color: var(--text-soft);
+}
+section {
+  margin-bottom: 56px;
+  scroll-margin-top: 20px;
+}
+section > h2 {
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--text);
+  margin-bottom: 8px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+}
+section > h2 .anchor {
+  color: var(--brand);
+  font-weight: 700;
+  margin-right: 8px;
+  font-variant-numeric: tabular-nums;
+}
+section h3 {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text);
+  margin: 32px 0 12px;
+  letter-spacing: -0.01em;
+}
+section h4 {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+  margin: 20px 0 8px;
+}
+section p {
+  margin-bottom: 12px;
+  color: var(--text-soft);
+}
+section ul, section ol {
+  margin: 8px 0 16px 24px;
+  color: var(--text-soft);
+}
+section li { margin-bottom: 4px; }
+section strong { color: var(--text); font-weight: 700; }
+section a { color: var(--brand); text-decoration: none; }
+section a:hover { text-decoration: underline; }
+code {
+  font-family: 'JetBrains Mono', 'SF Mono', 'Monaco', 'Consolas', monospace;
+  font-size: 13px;
+  background: var(--brand-soft);
+  color: var(--brand-dark);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: 500;
+}
+pre {
+  background: var(--bg-code);
+  color: #e2e8f0;
+  padding: 18px 20px;
+  border-radius: 8px;
+  overflow-x: auto;
+  margin: 12px 0 20px;
+  font-family: 'JetBrains Mono', 'SF Mono', 'Monaco', 'Consolas', monospace;
+  font-size: 12.5px;
+  line-height: 1.6;
+  box-shadow: var(--shadow);
+  border: 1px solid rgba(148, 163, 184, 0.15);
+}
+pre code {
+  background: none;
+  padding: 0;
+  color: inherit;
+  font-size: inherit;
+  font-weight: 400;
+}
+.cmt { color: var(--code-comment); font-style: italic; }
+.kw { color: var(--code-keyword); font-weight: 600; }
+.str { color: var(--code-string); }
+.cmd { color: var(--code-cmd); font-weight: 600; }
+.var { color: var(--code-var); }
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 12px 0 20px;
+  font-size: 13.5px;
+  background: var(--bg);
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+}
+th {
+  background: var(--bg-subtle);
+  color: var(--text);
+  font-weight: 700;
+  text-align: left;
+  padding: 12px 14px;
+  border-bottom: 2px solid var(--border);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+td {
+  padding: 10px 14px;
+  border-top: 1px solid var(--border-soft);
+  color: var(--text-soft);
+  vertical-align: top;
+}
+td code { font-size: 12px; }
+tbody tr:hover { background: var(--bg-subtle); }
+.callout {
+  padding: 14px 18px;
+  border-radius: 8px;
+  margin: 16px 0;
+  font-size: 14px;
+  border-left: 3px solid;
+}
+.callout.info { background: rgba(59, 130, 246, 0.08); border-left-color: var(--accent-blue); color: var(--text-soft); }
+.callout.warn { background: rgba(217, 119, 6, 0.08); border-left-color: var(--accent-amber); color: var(--text-soft); }
+.callout.ok { background: rgba(22, 163, 74, 0.08); border-left-color: var(--accent-green); color: var(--text-soft); }
+.callout.danger { background: rgba(227, 27, 35, 0.08); border-left-color: var(--brand); color: var(--text-soft); }
+.callout strong { color: var(--text); }
+.expected {
+  font-size: 13px;
+  color: var(--text-soft);
+  padding: 10px 14px 10px 32px;
+  background: var(--bg-subtle);
+  border-radius: 6px;
+  border-left: 3px solid var(--accent-green);
+  margin: -8px 0 20px;
+  position: relative;
+}
+.expected::before {
+  content: "→";
+  position: absolute;
+  left: 12px;
+  color: var(--accent-green);
+  font-weight: 700;
+}
+.badges {
+  display: inline-flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.badge.brand { background: var(--brand); color: white; }
+.badge.ok { background: var(--accent-green); color: white; }
+.badge.warn { background: var(--accent-amber); color: white; }
+.badge.info { background: var(--accent-blue); color: white; }
+.badge.soft { background: var(--bg-subtle); color: var(--text-soft); border: 1px solid var(--border); }
+pre.diagram {
+  background: var(--bg-subtle);
+  color: var(--text-soft);
+  border: 1px solid var(--border);
+  font-size: 11.5px;
+  line-height: 1.35;
+}
+footer {
+  padding: 40px 60px;
+  border-top: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: 12px;
+  text-align: center;
+}
+/* ── RESPONSIVE ── */
+@media (max-width: 900px) {
+  .wrapper { grid-template-columns: 1fr; }
+  aside {
+    position: static;
+    height: auto;
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+  }
+  main { padding: 24px; }
+  main > header h1 { font-size: 24px; }
+  section > h2 { font-size: 20px; }
+  footer { padding: 20px; }
+}
+/* ── PRINT ── */
+@media print {
+  body { font-size: 11px; color: #000; background: #fff; }
+  aside { display: none; }
+  .wrapper { display: block; }
+  main { padding: 20px; max-width: 100%; }
+  pre { break-inside: avoid; box-shadow: none; border: 1px solid #ccc; background: #f4f4f4; color: #000; }
+  pre .cmt, pre .kw, pre .str, pre .cmd, pre .var { color: #000; }
+  table { break-inside: avoid; }
+  section { break-inside: avoid-page; }
+  h2, h3 { break-after: avoid; }
+  a { color: #000; text-decoration: underline; }
+  .callout { break-inside: avoid; border: 1px solid #ccc; }
+}
+</style>
+</head>
+<body>
+
+<div class="wrapper">
+
+<aside>
+  <div class="brand">
+    <svg viewBox="0 0 400 320" width="36" height="36"><polygon points="60,40 60,280 320,160" fill="#E31B23"/></svg>
+    <div>
+      <h1>MonCash BI Portal</h1>
+      <div class="subtitle">Guide de déploiement IT</div>
+    </div>
+  </div>
+  <nav>
+    <h3>Sommaire</h3>
+    <ol>
+      <li><a href="#s1"><span class="num">1.</span> Vue d'ensemble</a></li>
+      <li><a href="#s2"><span class="num">2.</span> Prérequis</a></li>
+      <li><a href="#s3"><span class="num">3.</span> Préparation serveur</a></li>
+      <li><a href="#s4"><span class="num">4.</span> Installation Docker</a></li>
+      <li><a href="#s5"><span class="num">5.</span> Firewall UFW</a></li>
+      <li><a href="#s6"><span class="num">6.</span> Récupération du code</a></li>
+      <li><a href="#s7"><span class="num">7.</span> Configuration .env</a></li>
+      <li><a href="#s8"><span class="num">8.</span> Build &amp; démarrage</a></li>
+      <li><a href="#s9"><span class="num">9.</span> Vérifications</a></li>
+      <li><a href="#s10"><span class="num">10.</span> DNS &amp; accès</a></li>
+      <li><a href="#s11"><span class="num">11.</span> Mode démo actuel</a></li>
+      <li><a href="#s12"><span class="num">12.</span> Maintenance</a></li>
+      <li><a href="#s13"><span class="num">13.</span> Dépannage</a></li>
+      <li><a href="#s14"><span class="num">14.</span> Annexes</a></li>
+      <li><a href="#resume"><span class="num">🎯</span> Résumé — 10 commandes</a></li>
+    </ol>
+  </nav>
+</aside>
+
+<main>
+<header>
+  <div class="kicker">Runbook opérationnel · v1.0</div>
+  <h1>MonCash BI Portal<br>Guide de Déploiement IT</h1>
+  <div class="meta">
+    <span><strong>Public cible :</strong> Équipe IT Digicel Haiti</span>
+    <span><strong>Auteur :</strong> Mike JEAN LOUIS</span>
+    <span><strong>Date :</strong> 2026-07-17</span>
+  </div>
+  <div class="callout">
+    Ce document est un <strong>runbook opérationnel</strong> : chaque étape contient les commandes exactes à exécuter, ce qu'il faut attendre en sortie, et les erreurs connues avec leur résolution. Suivez-le dans l'ordre.
+  </div>
+</header>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<section id="s1">
+  <h2><span class="anchor">1.</span> Vue d'ensemble</h2>
+
+  <h3>1.1 Architecture</h3>
+  <p>Le portail est packagé en 3 containers Docker orchestrés par Docker Compose :</p>
+<pre class="diagram">                   ┌────────────────────────────────────────────┐
+                   │       Serveur Linux (port 80 exposé)       │
+                   │                                            │
+   Navigateurs ──► │   bi-frontend (nginx 1.27)                 │
+   utilisateurs    │      ├── sert le bundle React/Vite         │
+                   │      └── proxy /api/* → bi-backend:8000    │
+                   │                                            │
+                   │   bi-backend (FastAPI, Uvicorn) ─┐         │
+                   │       │                          │         │
+                   │       ▼                          ▼         │
+                   │   Databricks SQL             bi-redis      │
+                   │   (analytics)                (cache)       │
+                   │                                            │
+                   └────────────────────────────────────────────┘</pre>
+
+  <h3>1.2 Composants</h3>
+  <table>
+    <thead><tr><th>Container</th><th>Rôle</th><th>Image de base</th><th>Port exposé</th></tr></thead>
+    <tbody>
+      <tr><td><code>bi-frontend</code></td><td>Serveur web (nginx) + SPA React</td><td><code>nginx:1.27-alpine</code></td><td>80 (sur l'hôte)</td></tr>
+      <tr><td><code>bi-backend</code></td><td>API FastAPI, connexion Databricks</td><td><code>python:3.13-slim</code></td><td>8000 (interne)</td></tr>
+      <tr><td><code>bi-redis</code></td><td>Cache résultats analytics</td><td><code>redis:7-alpine</code></td><td>6379 (interne)</td></tr>
+    </tbody>
+  </table>
+  <div class="callout ok"><strong>Sécurité :</strong> seul le port 80 est ouvert vers l'extérieur. Backend et Redis restent sur le réseau interne Docker (<code>moncash-portal_bi-net</code>).</div>
+
+  <h3>1.3 Volumétrie</h3>
+  <ul>
+    <li>Images Docker : <strong>~1 GB</strong> (backend 980 MB + frontend 78 MB + Redis mini)</li>
+    <li>Cache de build : ~1.7 GB (transitoire)</li>
+    <li>Espace disque recommandé : <strong>20 GB minimum</strong></li>
+  </ul>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<section id="s2">
+  <h2><span class="anchor">2.</span> Prérequis</h2>
+
+  <h3>2.1 Matériel serveur</h3>
+  <table>
+    <thead><tr><th>Ressource</th><th>Minimum</th><th>Recommandé</th></tr></thead>
+    <tbody>
+      <tr><td>CPU</td><td>2 cœurs</td><td><strong>4 cœurs</strong></td></tr>
+      <tr><td>RAM</td><td>4 GB</td><td><strong>8 GB</strong></td></tr>
+      <tr><td>Disque</td><td>20 GB libres</td><td><strong>50 GB libres</strong></td></tr>
+      <tr><td>Réseau</td><td>100 Mbps</td><td><strong>1 Gbps</strong></td></tr>
+    </tbody>
+  </table>
+
+  <h3>2.2 Système d'exploitation</h3>
+  <ul>
+    <li><strong>Ubuntu 22.04 LTS</strong> ou plus récent (validé sur Ubuntu 26.04 « Resolute Raccoon »)</li>
+    <li>Autres distributions avec Docker Engine 24+ acceptables (RHEL 9, Debian 12)</li>
+  </ul>
+
+  <h3>2.3 Réseau — Accès sortants requis</h3>
+  <p>Depuis le serveur vers Internet, ces flux <strong>doivent être autorisés</strong> :</p>
+  <table>
+    <thead><tr><th>Destination</th><th>Port</th><th>Usage</th></tr></thead>
+    <tbody>
+      <tr><td><code>hub.docker.com</code> (<code>*.docker.io</code>)</td><td>443</td><td>Pull des images Docker</td></tr>
+      <tr><td><code>github.com</code></td><td>443</td><td>Clone du repo</td></tr>
+      <tr><td><code>adb-&lt;xxxx&gt;.azuredatabricks.net</code></td><td>443</td><td>Requêtes SQL Databricks</td></tr>
+      <tr><td><code>login.microsoftonline.com</code></td><td>443</td><td>Acquisition token Azure AD</td></tr>
+    </tbody>
+  </table>
+  <p><strong>Test rapide avant déploiement :</strong></p>
+<pre><span class="kw">for</span> url <span class="kw">in</span> \
+  <span class="str">"https://adb-3415321098130757.17.azuredatabricks.net"</span> \
+  <span class="str">"https://login.microsoftonline.com"</span> \
+  <span class="str">"https://hub.docker.com/v2/"</span> \
+  <span class="str">"https://github.com"</span>; <span class="kw">do</span>
+  <span class="cmd">echo</span> -n <span class="str">"$url : "</span>
+  <span class="cmd">curl</span> -s -o /dev/null -w <span class="str">"%{http_code}\n"</span> --max-time 5 <span class="str">"$url"</span>
+<span class="kw">done</span></pre>
+  <div class="expected">Attendu : 4 codes HTTP entre 200-401 (401 pour Docker Hub est normal, c'est l'auth challenge)</div>
+
+  <h3>2.4 Réseau — Accès entrants</h3>
+  <ul>
+    <li>Port <strong>22 (SSH)</strong> ouvert depuis les postes admin (au minimum bastion / poste IT)</li>
+    <li>Port <strong>80 (HTTP)</strong> ouvert depuis le VLAN utilisateurs</li>
+  </ul>
+
+  <h3>2.5 Credentials Azure Service Principal <span class="badge brand">Critique</span></h3>
+  <p>Le backend s'authentifie auprès de Databricks via <strong>Azure AD Service Principal</strong> (pas de PAT hardcodé). L'équipe Cloud/Sécurité doit fournir :</p>
+  <ul>
+    <li><code>AZURE_TENANT_ID</code> — GUID du tenant Digicel</li>
+    <li><code>AZURE_CLIENT_ID</code> — App ID de la SP créée pour le portail</li>
+    <li><code>AZURE_CLIENT_SECRET</code> — secret de la SP (à noter, non réutilisable)</li>
+  </ul>
+  <p><strong>Permissions requises</strong> sur la SP :</p>
+  <ul>
+    <li><code>SQL execute</code> sur le warehouse Databricks cible</li>
+    <li>Accès en lecture au catalogue <code>gr_dgc_dwh_prd.ods_dl</code></li>
+  </ul>
+  <div class="callout danger"><strong>Sans ces 3 valeurs</strong>, le backend démarre mais toute requête analytics retourne HTTP 500.</div>
+
+  <h3>2.6 Compte GitHub</h3>
+  <p>Le code source est sur <a href="https://github.com/Mike5449/MonCash_BI">github.com/Mike5449/MonCash_BI</a> — repo <strong>public</strong>, aucun credential nécessaire pour cloner.</p>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<section id="s3">
+  <h2><span class="anchor">3.</span> Préparation du serveur Linux</h2>
+
+  <h3>3.1 Connexion SSH</h3>
+<pre><span class="cmd">ssh</span> root@ht-moncashreporting     <span class="cmt"># ou root@&lt;IP&gt;</span></pre>
+  <p>Toutes les commandes ci-après supposent une session en tant que <code>root</code> (ou avec <code>sudo</code>).</p>
+
+  <h3>3.2 Mise à jour du système</h3>
+<pre><span class="cmd">apt-get</span> update
+<span class="cmd">apt-get</span> upgrade -y</pre>
+
+  <h3>3.3 Fuseau horaire</h3>
+  <p>Garder UTC comme fuseau serveur (standard infra) :</p>
+<pre><span class="cmd">timedatectl</span> set-timezone UTC
+<span class="cmd">timedatectl</span></pre>
+
+  <h3>3.4 Synchronisation NTP <span class="badge warn">Particularité Digicel</span></h3>
+  <div class="callout warn"><strong>Problème connu :</strong> le firewall corporate Digicel <strong>bloque le port 4460 (NTS-KE)</strong> utilisé par les serveurs NTP par défaut d'Ubuntu (<code>ntp.ubuntu.com</code>). Résultat : <code>chronyd</code> ne parvient pas à synchroniser l'horloge, ce qui casse l'acquisition de tokens Azure AD (tolérance max 5 min d'écart).</div>
+
+  <h4>3.4.1 Fixer l'horloge immédiatement via HTTPS (workaround)</h4>
+<pre><span class="cmt"># Utilise l'en-tete HTTP Date de Google (HTTPS 443, jamais bloque)</span>
+<span class="cmd">date</span> -s <span class="str">"$(curl -sI https://www.google.com | grep -i '^date:' | sed 's/^[Dd]ate: //I' | tr -d '\r')"</span>
+
+<span class="cmt"># Verifier</span>
+<span class="cmd">date</span> -u
+<span class="cmd">timedatectl</span> status | <span class="cmd">grep</span> -E <span class="str">"Local time|Universal"</span></pre>
+  <div class="expected">L'horloge doit maintenant être proche de l'heure UTC réelle (précision : ~1 seconde).</div>
+
+  <h4>3.4.2 Installer chrony pour la synchronisation continue</h4>
+<pre><span class="cmd">apt-get</span> install -y chrony
+
+<span class="cmt"># Remplacer les pools NTS-only (bloques) par pool.ntp.org classique</span>
+<span class="cmd">sed</span> -i <span class="str">'s/^\(pool.*ntp.ubuntu.com.*\)/#\1/'</span> /etc/chrony/chrony.conf
+<span class="cmd">grep</span> -q <span class="str">"^pool pool.ntp.org"</span> /etc/chrony/chrony.conf \
+  || <span class="cmd">echo</span> <span class="str">"pool pool.ntp.org iburst maxsources 4"</span> &gt;&gt; /etc/chrony/chrony.conf
+
+<span class="cmt"># Autoriser des sauts d'horloge illimites (evite l'echec sur gros offset)</span>
+<span class="kw">if</span> <span class="cmd">grep</span> -q <span class="str">"^makestep"</span> /etc/chrony/chrony.conf; <span class="kw">then</span>
+    <span class="cmd">sed</span> -i <span class="str">'s|^makestep.*|makestep 1.0 -1|'</span> /etc/chrony/chrony.conf
+<span class="kw">else</span>
+    <span class="cmd">echo</span> <span class="str">"makestep 1.0 -1"</span> &gt;&gt; /etc/chrony/chrony.conf
+<span class="kw">fi</span>
+
+<span class="cmd">systemctl</span> restart chrony
+<span class="cmd">sleep</span> 30
+<span class="cmd">chronyc</span> tracking | <span class="cmd">head</span> -5</pre>
+  <div class="expected">Après ~30 s : <code>Reference ID</code> non nul, <code>System time</code> avec offset &lt; 1 s.</div>
+  <div class="callout info">Même si <code>timedatectl status</code> affiche <code>System clock synchronized: no</code> pendant quelques minutes, l'horloge est OK grâce au workaround HTTPS.</div>
+
+  <h3>3.5 Vérification de l'environnement</h3>
+<pre><span class="cmd">echo</span> <span class="str">"=== Systeme ==="</span>
+<span class="cmd">lsb_release</span> -a
+<span class="cmd">uname</span> -r
+
+<span class="cmd">echo</span> <span class="str">"=== CPU / Memoire / Disque ==="</span>
+<span class="cmd">nproc</span>
+<span class="cmd">free</span> -h
+<span class="cmd">df</span> -h /
+
+<span class="cmd">echo</span> <span class="str">"=== Reseau ==="</span>
+<span class="cmd">ip</span> -4 addr | <span class="cmd">grep</span> inet | <span class="cmd">grep</span> -v 127.0.0.1
+<span class="cmd">hostname</span> -f</pre>
+  <p>Notez l'IP privée du serveur — vous en aurez besoin pour le CORS et pour donner l'URL aux utilisateurs.</p>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<section id="s4">
+  <h2><span class="anchor">4.</span> Installation de Docker</h2>
+
+  <h3>4.1 Installation via le script officiel</h3>
+<pre><span class="cmt"># Purge des anciennes versions eventuelles</span>
+<span class="cmd">apt-get</span> remove -y docker docker-engine docker.io containerd runc 2&gt;/dev/null || <span class="kw">true</span>
+
+<span class="cmt"># Installation par le script officiel Docker Inc.</span>
+<span class="cmd">curl</span> -fsSL https://get.docker.com -o /tmp/get-docker.sh
+<span class="cmd">sh</span> /tmp/get-docker.sh
+<span class="cmd">rm</span> /tmp/get-docker.sh
+
+<span class="cmt"># Activation + demarrage du daemon</span>
+<span class="cmd">systemctl</span> enable docker
+<span class="cmd">systemctl</span> start docker</pre>
+
+  <h3>4.2 Validation</h3>
+<pre><span class="cmd">docker</span> version | <span class="cmd">head</span> -20
+<span class="cmd">docker</span> compose version
+<span class="cmd">docker</span> run --rm hello-world</pre>
+  <div class="expected">
+    Docker Engine – Community version ≥ 24<br>
+    Docker Compose version v2.x (ou v5.x)<br>
+    Sortie « Hello from Docker! » du container test
+  </div>
+
+  <h3>4.3 Nettoyage du container test</h3>
+<pre><span class="cmd">docker</span> container prune -f
+<span class="cmd">docker</span> image rm hello-world 2&gt;/dev/null</pre>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<section id="s5">
+  <h2><span class="anchor">5.</span> Configuration du firewall (UFW)</h2>
+  <p>L'accès au serveur doit être verrouillé au strict nécessaire.</p>
+<pre><span class="cmt"># 1. Installer UFW si absent (normalement present sur Ubuntu)</span>
+<span class="cmd">apt-get</span> install -y ufw
+
+<span class="cmt"># 2. Politique par defaut</span>
+<span class="cmd">ufw</span> default deny incoming
+<span class="cmd">ufw</span> default allow outgoing
+
+<span class="cmt"># 3. Autoriser SSH (CRITIQUE - avant d'activer, sinon perte de connexion)</span>
+<span class="cmd">ufw</span> allow 22/tcp comment <span class="str">'SSH'</span>
+
+<span class="cmt"># 4. Autoriser HTTP</span>
+<span class="cmd">ufw</span> allow 80/tcp comment <span class="str">'HTTP MonCash Portal'</span>
+
+<span class="cmt"># 5. Activer</span>
+<span class="cmd">ufw</span> --force enable
+
+<span class="cmt"># 6. Verifier</span>
+<span class="cmd">ufw</span> status verbose</pre>
+  <div class="expected"><code>Status: active</code> + règles listées pour 22 et 80 (IPv4 + IPv6).</div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<section id="s6">
+  <h2><span class="anchor">6.</span> Récupération du code</h2>
+  <p>Le code source est publié sur GitHub (repo public).</p>
+<pre><span class="cmt"># 1. Installer git si absent</span>
+<span class="cmd">git</span> --version || <span class="cmd">apt-get</span> install -y git
+
+<span class="cmt"># 2. Cloner dans /opt (emplacement standard applications tierces)</span>
+<span class="cmd">mkdir</span> -p /opt
+<span class="cmd">cd</span> /opt
+<span class="cmd">git</span> clone https://github.com/Mike5449/MonCash_BI.git moncash-portal
+<span class="cmd">cd</span> moncash-portal
+
+<span class="cmt"># 3. Verifier</span>
+<span class="cmd">git</span> log --oneline | <span class="cmd">head</span> -5
+<span class="cmd">ls</span> -la</pre>
+  <div class="expected">Plusieurs commits dans l'historique, dossiers <code>backend/</code>, <code>frontend/</code>, fichiers <code>docker-compose.yml</code>, <code>.env.example</code>.</div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<section id="s7">
+  <h2><span class="anchor">7.</span> Configuration du fichier <code>.env</code></h2>
+  <p>Le <code>.env</code> centralise <strong>toutes</strong> les variables sensibles. Docker Compose l'injecte dans les containers au démarrage.</p>
+
+  <h3>7.1 Générer le .env de production</h3>
+  <p>Le script ci-dessous détecte automatiquement l'IP du serveur, génère des clés JWT robustes, et laisse les 3 vars Azure vides (à remplir par la sécurité).</p>
+<pre><span class="cmd">cd</span> /opt/moncash-portal
+
+<span class="var">SERVER_IP</span>=$(<span class="cmd">hostname</span> -I | <span class="cmd">awk</span> <span class="str">'{print $1}'</span>)
+<span class="var">SECRET_KEY</span>=$(<span class="cmd">openssl</span> rand -hex 64)
+<span class="var">REFRESH_SECRET_KEY</span>=$(<span class="cmd">openssl</span> rand -hex 64)
+
+<span class="cmd">cat</span> &gt; .env &lt;&lt; EOF
+<span class="cmt"># ─────────────────────────────────────────────────────────────────</span>
+<span class="cmt"># MonCash BI Portal — Production .env</span>
+<span class="cmt"># Server: $(hostname) (${SERVER_IP})</span>
+<span class="cmt"># Generated: $(date -u '+%Y-%m-%d %H:%M UTC')</span>
+<span class="cmt"># ─────────────────────────────────────────────────────────────────</span>
+
+<span class="cmt"># ── Databricks SQL warehouse (Digicel Haiti prod) ────────────────</span>
+DATABRICKS_SERVER_HOSTNAME=adb-3415321098130757.17.azuredatabricks.net
+DATABRICKS_HTTP_PATH=/sql/1.0/warehouses/df8d98fb09f6a448
+ANALYTICS_INPUT_PATH=gr_dgc_dwh_prd.ods_dl
+
+<span class="cmt"># ── Azure Service Principal (A REMPLIR par equipe securite) ──────</span>
+AZURE_TENANT_ID=
+AZURE_CLIENT_ID=
+AZURE_CLIENT_SECRET=
+
+<span class="cmt"># ── JWT signing keys (128 chars hex chacune, generees a l'install) ──</span>
+SECRET_KEY=${SECRET_KEY}
+REFRESH_SECRET_KEY=${REFRESH_SECRET_KEY}
+ACCESS_TOKEN_EXPIRE_MINUTES=30
+REFRESH_TOKEN_EXPIRE_DAYS=7
+
+<span class="cmt"># ── CORS ─────────────────────────────────────────────────────────</span>
+CORS_ORIGINS=http://${SERVER_IP},http://$(hostname),http://localhost
+
+<span class="cmt"># ── Cache TTL (10 min) ──────────────────────────────────────────</span>
+CACHE_DEFAULT_TTL=600
+
+<span class="cmt"># ── Runtime ──────────────────────────────────────────────────────</span>
+UVICORN_WORKERS=2
+WEB_PORT=80
+EOF
+
+<span class="cmt"># Securiser (root seul peut lire/ecrire)</span>
+<span class="cmd">chmod</span> 600 .env
+
+<span class="cmt"># Verifier</span>
+<span class="cmd">ls</span> -la .env
+<span class="cmd">awk</span> -F= <span class="str">'/^SECRET_KEY=/ {print "SECRET_KEY: " length($2) " chars"} /^REFRESH_SECRET_KEY=/ {print "REFRESH_SECRET_KEY: " length($2) " chars"}'</span> .env</pre>
+  <div class="expected">
+    Permissions <code>-rw-------</code> (600)<br>
+    <code>SECRET_KEY: 128 chars</code> et <code>REFRESH_SECRET_KEY: 128 chars</code>
+  </div>
+
+  <h3>7.2 Remplir les credentials Azure</h3>
+  <p>Une fois les 3 valeurs fournies par l'équipe sécurité :</p>
+<pre><span class="cmd">nano</span> .env</pre>
+  <p>Éditer les 3 lignes <code>AZURE_*=</code>, sauvegarder (<code>Ctrl+O</code>, <code>Enter</code>, <code>Ctrl+X</code>).</p>
+  <div class="callout danger"><strong>Ne jamais commiter le .env</strong> — il est déjà dans <code>.gitignore</code>, ne pas le déplacer.</div>
+
+  <h3>7.3 Explication des variables</h3>
+  <table>
+    <thead><tr><th>Variable</th><th>Description</th><th>Modifiable ?</th></tr></thead>
+    <tbody>
+      <tr><td><code>DATABRICKS_SERVER_HOSTNAME</code></td><td>Endpoint du workspace Databricks</td><td>Non (fixe)</td></tr>
+      <tr><td><code>DATABRICKS_HTTP_PATH</code></td><td>Chemin du SQL Warehouse</td><td>Non (fixe)</td></tr>
+      <tr><td><code>ANALYTICS_INPUT_PATH</code></td><td>Catalogue+schema source</td><td>Sur demande data eng</td></tr>
+      <tr><td><code>AZURE_TENANT_ID / CLIENT_ID / CLIENT_SECRET</code></td><td>Auth Azure AD</td><td>Fourni par sécurité</td></tr>
+      <tr><td><code>SECRET_KEY / REFRESH_SECRET_KEY</code></td><td>Signature JWT (jamais recyclées)</td><td>Regénérer si fuite</td></tr>
+      <tr><td><code>CORS_ORIGINS</code></td><td>Origines browser autorisées</td><td>Ajouter les nouveaux URLs</td></tr>
+      <tr><td><code>CACHE_DEFAULT_TTL</code></td><td>Durée cache Redis (s)</td><td>Ajuster si besoin</td></tr>
+      <tr><td><code>UVICORN_WORKERS</code></td><td>Workers backend</td><td>Augmenter si trafic ↑</td></tr>
+      <tr><td><code>WEB_PORT</code></td><td>Port host exposé</td><td>Changer si 80 déjà pris</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<section id="s8">
+  <h2><span class="anchor">8.</span> Build et démarrage des containers</h2>
+
+  <h3>8.1 Validation de la config</h3>
+<pre><span class="cmd">cd</span> /opt/moncash-portal
+<span class="cmd">docker</span> compose config --quiet &amp;&amp; <span class="cmd">echo</span> <span class="str">"OK config valide"</span> || <span class="cmd">echo</span> <span class="str">"ECHEC config invalide"</span>
+<span class="cmd">docker</span> compose config --services</pre>
+  <div class="expected"><code>OK config valide</code> puis liste des 3 services (<code>backend</code>, <code>frontend</code>, <code>redis</code>).</div>
+
+  <h3>8.2 Build des images</h3>
+  <div class="callout warn"><strong>Premier build : ~5-10 minutes</strong> (téléchargement des images de base + <code>pip install</code> backend + compilation Vite frontend).</div>
+<pre><span class="cmd">time</span> <span class="cmd">docker</span> compose build --progress=plain 2&gt;&amp;1 | <span class="cmd">tail</span> -80</pre>
+  <div class="expected">
+    <code>Image moncash/bi-backend:latest Built</code> ✅<br>
+    <code>Image moncash/bi-frontend:latest Built</code> ✅
+  </div>
+  <p><strong>Builds suivants</strong> (après modif de code) : quelques secondes à ~1 minute grâce au cache Docker.</p>
+
+  <h3>8.3 Démarrage du stack</h3>
+<pre><span class="cmd">docker</span> compose up -d
+<span class="cmd">sleep</span> 15
+<span class="cmd">docker</span> compose ps</pre>
+  <div class="expected">3 containers avec <code>STATUS: Up (healthy)</code> ou <code>Up (health: starting)</code>.</div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<section id="s9">
+  <h2><span class="anchor">9.</span> Vérifications post-déploiement</h2>
+
+  <h3>9.1 État des containers</h3>
+<pre><span class="cmd">docker</span> compose ps
+<span class="cmd">docker</span> compose logs --tail=30 backend
+<span class="cmd">docker</span> compose logs --tail=10 frontend</pre>
+  <div class="expected">Backend logs contiennent : <code>INFO: Application startup complete.</code> et <code>INFO: Uvicorn running on http://0.0.0.0:8000</code></div>
+
+  <h3>9.2 Test HTTP local</h3>
+<pre><span class="cmt"># Test frontend (doit retourner HTML)</span>
+<span class="cmd">curl</span> -sI http://localhost/ | <span class="cmd">head</span> -5
+
+<span class="cmt"># Test backend via nginx proxy (doit retourner JSON)</span>
+<span class="cmd">curl</span> -sI http://localhost/api/health</pre>
+  <div class="expected">Deux fois <code>HTTP/1.1 200 OK</code>.</div>
+
+  <h3>9.3 Test HTTP depuis un poste externe</h3>
+  <p>Depuis un poste dans le VLAN utilisateurs (PowerShell) :</p>
+<pre><span class="cmd">Test-NetConnection</span> -ComputerName &lt;IP_serveur&gt; -Port 80</pre>
+  <div class="expected"><code>TcpTestSucceeded : True</code></div>
+
+  <h3>9.4 Test navigateur</h3>
+  <p>Ouvrir : <code>http://&lt;IP_serveur&gt;/</code></p>
+  <div class="expected">Page login avec logo triangle rouge MonCash + titre « MonCashBI » dans l'onglet.</div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<section id="s10">
+  <h2><span class="anchor">10.</span> Accès utilisateurs &amp; DNS</h2>
+
+  <h3>10.1 Problème constaté : DNS interne Digicel ne résout pas le hostname</h3>
+  <p>Depuis les postes clients, <code>nslookup ht-moncashreporting</code> retourne <code>Non-existent domain</code>. Deux solutions :</p>
+
+  <h4>Option A — Ajout d'un enregistrement DNS interne <span class="badge ok">Recommandée</span></h4>
+  <p>Demander à l'équipe Réseau d'ajouter dans le DNS Digicel :</p>
+  <table>
+    <thead><tr><th>Champ</th><th>Valeur</th></tr></thead>
+    <tbody>
+      <tr><td>Type</td><td><code>A</code></td></tr>
+      <tr><td>Nom</td><td><code>moncash-bi.digicelgroup.local</code></td></tr>
+      <tr><td>Valeur</td><td>IP du serveur</td></tr>
+    </tbody>
+  </table>
+  <p>Après ajout, mettre à jour le <code>.env</code> :</p>
+<pre><span class="cmd">sed</span> -i <span class="str">'s|^CORS_ORIGINS=.*|CORS_ORIGINS=http://&lt;IP&gt;,http://moncash-bi.digicelgroup.local|'</span> .env
+<span class="cmd">docker</span> compose restart backend</pre>
+
+  <h4>Option B — Fichier <code>hosts</code> local (workaround individuel)</h4>
+  <p>Sur chaque poste utilisateur, ajouter :</p>
+<pre>&lt;IP_serveur&gt;  ht-moncashreporting</pre>
+  <ul>
+    <li>Windows : <code>C:\Windows\System32\drivers\etc\hosts</code> (droits admin)</li>
+    <li>Linux/Mac : <code>/etc/hosts</code></li>
+  </ul>
+
+  <h3>10.2 Communication de l'URL aux utilisateurs</h3>
+  <p>En attendant le DNS, communiquer aux utilisateurs :</p>
+<pre>http://&lt;IP_serveur&gt;/</pre>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<section id="s11">
+  <h2><span class="anchor">11.</span> Mode démo actuel &amp; prochaines étapes</h2>
+
+  <h3>11.1 État actuel du login</h3>
+  <div class="callout warn">Actuellement (2026-07-17), l'authentification est en <strong>mode démo</strong> :
+    <ul>
+      <li>Le champ accepte <strong>n'importe quel username</strong> (pas de format email requis)</li>
+      <li><strong>N'importe quel mot de passe</strong> (non vide) est accepté</li>
+      <li>Aucune vérification côté serveur, session uniquement stockée en <code>localStorage</code> du navigateur</li>
+    </ul>
+  </div>
+
+  <h3>11.2 Activation de l'authentification réelle</h3>
+  <p><strong>Objectif à moyen terme :</strong> brancher le portail sur l'annuaire d'entreprise (LDAP / Azure AD / ASP.NET auth existant à <code>http://hti-dtswebsrv:2020/api/Auth</code>).</p>
+  <p><strong>Modifications nécessaires :</strong></p>
+  <ol>
+    <li>Restaurer le code d'auth ASP.NET dans <code>frontend/src/services/auth.ts</code> (voir historique git avant le commit <code>060a13d</code>)</li>
+    <li>Ajouter dans <code>frontend/nginx.conf</code> un <code>location /auth-api/</code> proxy vers le serveur d'auth</li>
+    <li>Ajouter la variable <code>VITE_AUTH_API_URL</code> dans le build frontend</li>
+    <li>Tester le login end-to-end</li>
+  </ol>
+  <p>Cette activation nécessitera un <strong>rebuild frontend + redéploiement</strong> (~2 min).</p>
+
+  <h3>11.3 Complétion des analytics (Azure SP)</h3>
+  <p>Tant que les 3 vars <code>AZURE_*=</code> restent vides dans <code>.env</code>, <strong>les pages analytics affichent des erreurs 500</strong>. Dès livraison des creds :</p>
+<pre><span class="cmd">cd</span> /opt/moncash-portal
+<span class="cmd">nano</span> .env    <span class="cmt"># remplir AZURE_TENANT_ID, AZURE_CLIENT_ID, AZURE_CLIENT_SECRET</span>
+<span class="cmd">docker</span> compose restart backend
+<span class="cmd">docker</span> compose logs -f backend | <span class="cmd">grep</span> -E <span class="str">"AUTH|token"</span></pre>
+  <div class="expected"><code>[AUTH] Success! Token acquired. Expires in XX minutes.</code></div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<section id="s12">
+  <h2><span class="anchor">12.</span> Maintenance</h2>
+
+  <h3>12.1 Mise à jour du code (déploiement de nouvelle version)</h3>
+<pre><span class="cmd">cd</span> /opt/moncash-portal
+<span class="cmd">git</span> pull origin main
+<span class="cmd">docker</span> compose build
+<span class="cmd">docker</span> compose up -d</pre>
+  <p>Docker Compose détecte automatiquement les images qui ont changé et ne redémarre que les containers concernés.</p>
+
+  <h3>12.2 Consultation des logs</h3>
+<pre><span class="cmt"># En temps reel, tous services</span>
+<span class="cmd">docker</span> compose logs -f
+
+<span class="cmt"># Un seul service, derniers messages</span>
+<span class="cmd">docker</span> compose logs --tail=100 backend
+
+<span class="cmt"># Filtrer sur un pattern</span>
+<span class="cmd">docker</span> compose logs backend | <span class="cmd">grep</span> -E <span class="str">"ERROR|WARNING"</span>
+
+<span class="cmt"># Logs persistes sur disque (Docker gere la rotation automatiquement)</span>
+<span class="cmd">docker</span> inspect --format=<span class="str">'{{.LogPath}}'</span> bi-backend</pre>
+
+  <h3>12.3 Redémarrage</h3>
+<pre><span class="cmt"># Redemarrer un service seul</span>
+<span class="cmd">docker</span> compose restart backend
+
+<span class="cmt"># Redemarrer tout le stack (sans rebuild)</span>
+<span class="cmd">docker</span> compose restart
+
+<span class="cmt"># Recreer les containers (apres modif .env)</span>
+<span class="cmd">docker</span> compose up -d --force-recreate</pre>
+
+  <h3>12.4 Vidage du cache Redis</h3>
+  <p>Si des analytics semblent obsolètes :</p>
+<pre><span class="cmd">docker</span> compose exec redis redis-cli FLUSHDB</pre>
+
+  <h3>12.5 Arrêt / reprise du stack</h3>
+<pre><span class="cmt"># Arret propre (containers stoppes, volumes conserves)</span>
+<span class="cmd">docker</span> compose stop
+
+<span class="cmt"># Reprise</span>
+<span class="cmd">docker</span> compose start
+
+<span class="cmt"># Arret + suppression des containers (volumes conserves = pas de perte donnees)</span>
+<span class="cmd">docker</span> compose down
+
+<span class="cmt"># Arret + suppression totale (perte cache Redis)</span>
+<span class="cmd">docker</span> compose down -v</pre>
+
+  <h3>12.6 Nettoyage disque</h3>
+<pre><span class="cmt"># Verifier l'espace utilise par Docker</span>
+<span class="cmd">docker</span> system df
+
+<span class="cmt"># Nettoyer images/build cache inutilises (safe)</span>
+<span class="cmd">docker</span> system prune -a --volumes -f</pre>
+  <div class="callout warn">Ce nettoyage supprime : toutes les images non utilisées par un container UP, tous les volumes non attachés, tout le cache de build.</div>
+
+  <h3>12.7 Sauvegarde</h3>
+  <p><strong>Ce qui est à sauvegarder :</strong></p>
+  <ul>
+    <li><code>/opt/moncash-portal/.env</code> — configuration + secrets JWT (irréversible si perdu = tous les tokens invalidés)</li>
+    <li>Le code est sur GitHub, ne nécessite pas de backup local</li>
+  </ul>
+<pre><span class="cmt"># Copier .env vers un stockage securise</span>
+<span class="cmd">cp</span> /opt/moncash-portal/.env /backups/moncash-portal-env-$(<span class="cmd">date</span> +%Y%m%d).bak</pre>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<section id="s13">
+  <h2><span class="anchor">13.</span> Dépannage</h2>
+
+  <h3>13.1 Le container backend redémarre en boucle</h3>
+  <p><strong>Diagnostic :</strong> <code>docker compose logs backend | tail -50</code></p>
+  <table>
+    <thead><tr><th>Message d'erreur</th><th>Cause</th><th>Résolution</th></tr></thead>
+    <tbody>
+      <tr><td><code>AZURE_TENANT_ID environment variable not set</code></td><td>Vars Azure vides ou mal orthographiées</td><td>Vérifier <code>.env</code>, puis <code>docker compose restart backend</code></td></tr>
+      <tr><td><code>pydantic.ValidationError: SECRET_KEY</code></td><td>Clé JWT manquante ou vide</td><td>Regénérer avec <code>openssl rand -hex 64</code>, mettre à jour <code>.env</code></td></tr>
+      <tr><td><code>Could not resolve host: adb-...</code></td><td>DNS ou connectivité Databricks bloquée</td><td>Tester <code>curl https://adb-....azuredatabricks.net</code> depuis le container</td></tr>
+      <tr><td><code>Connection refused</code> sur <code>login.microsoftonline.com</code></td><td>Port 443 sortant bloqué vers Azure</td><td>Ouvrir la règle firewall</td></tr>
+    </tbody>
+  </table>
+
+  <h3>13.2 Le frontend charge mais toutes les requêtes API retournent 502</h3>
+  <p>Le backend n'est pas encore prêt (démarrage lent au premier boot) OU crashe.</p>
+<pre><span class="cmd">docker</span> compose ps                     <span class="cmt"># verifier "healthy"</span>
+<span class="cmd">docker</span> compose logs backend | <span class="cmd">tail</span> -30
+<span class="cmd">docker</span> compose restart backend</pre>
+
+  <h3>13.3 « CORS policy blocked » dans la console navigateur</h3>
+  <p>L'URL utilisée dans le navigateur n'est pas dans <code>CORS_ORIGINS</code> du <code>.env</code>.</p>
+<pre><span class="cmd">grep</span> CORS_ORIGINS /opt/moncash-portal/.env
+<span class="cmd">sed</span> -i <span class="str">'s|^CORS_ORIGINS=.*|&,http://nouvelle-url.digicel.local|'</span> /opt/moncash-portal/.env
+<span class="cmd">docker</span> compose restart backend</pre>
+
+  <h3>13.4 « Not able to reach the server » depuis le navigateur</h3>
+  <p><strong>Diagnostic étape par étape :</strong></p>
+  <ol>
+    <li>Depuis le serveur : <code>curl http://localhost/</code> → doit retourner du HTML</li>
+    <li>Depuis un poste client : <code>Test-NetConnection -ComputerName &lt;IP&gt; -Port 80</code></li>
+    <li>Si <code>TcpTestSucceeded : False</code> → firewall inter-VLAN Digicel bloque. Remonter à l'équipe Réseau.</li>
+    <li>Si <code>True</code> mais navigateur ne charge pas → vider le cache navigateur, tester en navigation privée.</li>
+  </ol>
+
+  <h3>13.5 Requêtes lentes / timeouts sur les analytics</h3>
+  <div class="callout info"><strong>Cause connue :</strong> les Databricks SQL warehouses <strong>auto-suspend</strong> après ~10 min sans requête. La première requête après suspend prend 15-30 s pour « réveiller » le cluster. C'est <strong>normal</strong>.</div>
+  <p>Solution long-terme : configurer le warehouse en <code>Always On</code> (coût financier plus élevé, à valider avec Finance).</p>
+
+  <h3>13.6 Le stack ne démarre pas après un <code>docker compose up -d</code></h3>
+<pre><span class="cmd">docker</span> compose ps                    <span class="cmt"># voir quel container a un probleme</span>
+<span class="cmd">docker</span> compose logs &lt;service&gt;
+<span class="cmd">docker</span> compose down                  <span class="cmt"># tout arreter proprement</span>
+<span class="cmd">docker</span> system df                     <span class="cmt"># verifier espace disque</span>
+<span class="cmd">docker</span> compose up -d --force-recreate</pre>
+
+  <h3>13.7 Erreur « no space left on device » pendant le build</h3>
+<pre><span class="cmd">docker</span> system df                  <span class="cmt"># voir l'espace utilise</span>
+<span class="cmd">docker</span> builder prune -f           <span class="cmt"># vider le cache de build</span>
+<span class="cmd">docker</span> image prune -a -f          <span class="cmt"># supprimer images inutilisees</span>
+<span class="cmd">df</span> -h /                           <span class="cmt"># verifier l'espace disque host</span></pre>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<section id="s14">
+  <h2><span class="anchor">14.</span> Annexes</h2>
+
+  <h3>14.1 Structure des fichiers</h3>
+<pre class="diagram">/opt/moncash-portal/
+├── GUIDE_DEPLOIEMENT_IT.md      ← version markdown de ce document
+├── GUIDE_DEPLOIEMENT_IT.html    ← version HTML (celle-ci)
+├── DEPLOYMENT.md                ← doc anglaise plus concise
+├── README.md
+├── docker-compose.yml           ← definition du stack (3 services)
+├── .env.example                 ← template (versionne)
+├── .env                         ← config prod (jamais commiter)
+├── .gitignore
+├── backend/
+│   ├── Dockerfile               ← Python 3.13 + tesseract + uvicorn
+│   ├── requirements.txt
+│   ├── main.py                  ← FastAPI app
+│   ├── database.py              ← acquisition token Azure + engine SQL
+│   ├── core/                    ← config, security, cache
+│   ├── models/                  ← modeles SQLAlchemy
+│   ├── routers/                 ← endpoints API par domaine
+│   ├── repositories/            ← acces donnees Databricks
+│   ├── services/                ← logique metier
+│   └── alembic/                 ← migrations schema
+└── frontend/
+    ├── Dockerfile               ← Node 20 builder → nginx 1.27 runtime
+    ├── nginx.conf               ← reverse proxy /api/* -> backend
+    ├── index.html               ← titre + favicon
+    ├── public/
+    │   ├── moncash-logo.svg     ← favicon SVG (triangle rouge)
+    │   └── moncah-logo.png      ← fallback favicon PNG
+    └── src/
+        ├── main.tsx
+        ├── App.tsx              ← routing React Router
+        ├── pages/               ← pages metier (dashboards)
+        ├── components/
+        ├── hooks/               ← hooks React Query pour Databricks
+        ├── services/auth.ts     ← mode demo actuellement
+        └── api/                 ← client HTTP auto-genere OpenAPI</pre>
+
+  <h3>14.2 Ports utilisés</h3>
+  <table>
+    <thead><tr><th>Port</th><th>Service</th><th>Exposition</th></tr></thead>
+    <tbody>
+      <tr><td>22/tcp</td><td>SSH</td><td>Hôte (via UFW)</td></tr>
+      <tr><td>80/tcp</td><td>HTTP (nginx frontend)</td><td>Hôte (via UFW)</td></tr>
+      <tr><td>8000/tcp</td><td>FastAPI backend</td><td><strong>Interne Docker uniquement</strong></td></tr>
+      <tr><td>6379/tcp</td><td>Redis</td><td><strong>Interne Docker uniquement</strong></td></tr>
+    </tbody>
+  </table>
+
+  <h3>14.3 Commandes utiles — mémo rapide</h3>
+<pre><span class="cmt"># Ou est le projet ?</span>
+<span class="cmd">cd</span> /opt/moncash-portal
+
+<span class="cmt"># Etat instantane</span>
+<span class="cmd">docker</span> compose ps
+<span class="cmd">docker</span> system df
+
+<span class="cmt"># Suivre les logs</span>
+<span class="cmd">docker</span> compose logs -f backend
+<span class="cmd">docker</span> compose logs -f frontend
+
+<span class="cmt"># Redemarrer apres modif .env</span>
+<span class="cmd">docker</span> compose restart backend
+
+<span class="cmt"># Deployer une nouvelle version</span>
+<span class="cmd">git</span> pull &amp;&amp; <span class="cmd">docker</span> compose build &amp;&amp; <span class="cmd">docker</span> compose up -d
+
+<span class="cmt"># Vider le cache</span>
+<span class="cmd">docker</span> compose exec redis redis-cli FLUSHDB
+
+<span class="cmt"># Shell dans le container backend</span>
+<span class="cmd">docker</span> compose exec backend bash
+
+<span class="cmt"># Ressources consommees en direct</span>
+<span class="cmd">docker</span> stats --no-stream</pre>
+
+  <h3>14.4 Variables d'environnement — référence complète</h3>
+  <table>
+    <thead><tr><th>Nom</th><th>Type</th><th>Défaut</th><th>Description</th></tr></thead>
+    <tbody>
+      <tr><td><code>DATABRICKS_SERVER_HOSTNAME</code></td><td>string</td><td>(requis)</td><td>Endpoint du workspace</td></tr>
+      <tr><td><code>DATABRICKS_HTTP_PATH</code></td><td>string</td><td>(requis)</td><td>Chemin du SQL Warehouse</td></tr>
+      <tr><td><code>ANALYTICS_INPUT_PATH</code></td><td>string</td><td>(requis)</td><td><code>catalog.schema</code> source</td></tr>
+      <tr><td><code>AZURE_TENANT_ID</code></td><td>GUID</td><td>(vide)</td><td>Tenant Azure AD Digicel</td></tr>
+      <tr><td><code>AZURE_CLIENT_ID</code></td><td>GUID</td><td>(vide)</td><td>App ID Service Principal</td></tr>
+      <tr><td><code>AZURE_CLIENT_SECRET</code></td><td>string</td><td>(vide)</td><td>Secret Service Principal</td></tr>
+      <tr><td><code>SECRET_KEY</code></td><td>hex 128</td><td>(généré)</td><td>Signature JWT access</td></tr>
+      <tr><td><code>REFRESH_SECRET_KEY</code></td><td>hex 128</td><td>(généré)</td><td>Signature JWT refresh</td></tr>
+      <tr><td><code>ACCESS_TOKEN_EXPIRE_MINUTES</code></td><td>int</td><td>30</td><td>Durée validité access token</td></tr>
+      <tr><td><code>REFRESH_TOKEN_EXPIRE_DAYS</code></td><td>int</td><td>7</td><td>Durée validité refresh token</td></tr>
+      <tr><td><code>CORS_ORIGINS</code></td><td>CSV</td><td>(requis)</td><td>Origines browser autorisées</td></tr>
+      <tr><td><code>CACHE_DEFAULT_TTL</code></td><td>int</td><td>600</td><td>TTL cache Redis (s)</td></tr>
+      <tr><td><code>UVICORN_WORKERS</code></td><td>int</td><td>2</td><td>Workers backend</td></tr>
+      <tr><td><code>WEB_PORT</code></td><td>int</td><td>80</td><td>Port host exposé</td></tr>
+    </tbody>
+  </table>
+
+  <h3>14.5 Contacts</h3>
+  <table>
+    <thead><tr><th>Rôle</th><th>Personne</th><th>Contact</th></tr></thead>
+    <tbody>
+      <tr><td>Développeur / Owner</td><td>Mike JEAN LOUIS</td><td>jeanlouismike89@gmail.com</td></tr>
+      <tr><td>Équipe Réseau Digicel</td><td>(à compléter)</td><td>—</td></tr>
+      <tr><td>Équipe Sécurité / Azure</td><td>(à compléter)</td><td>—</td></tr>
+      <tr><td>Équipe Data / Databricks</td><td>(à compléter)</td><td>—</td></tr>
+    </tbody>
+  </table>
+
+  <h3>14.6 Références externes</h3>
+  <ul>
+    <li>Docker Compose : <a href="https://docs.docker.com/compose/">docs.docker.com/compose</a></li>
+    <li>Databricks SQL : <a href="https://docs.databricks.com/sql/">docs.databricks.com/sql</a></li>
+    <li>FastAPI : <a href="https://fastapi.tiangolo.com/">fastapi.tiangolo.com</a></li>
+    <li>Vite : <a href="https://vitejs.dev/">vitejs.dev</a></li>
+    <li>Repo source : <a href="https://github.com/Mike5449/MonCash_BI">github.com/Mike5449/MonCash_BI</a></li>
+  </ul>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<section id="resume">
+  <h2><span class="anchor">🎯</span> Résumé — Déploiement en 10 commandes</h2>
+  <p>Pour un serveur Ubuntu vierge, avec les credentials Azure prêts :</p>
+<pre><span class="cmt"># 1. Preparation systeme</span>
+<span class="cmd">apt-get</span> update &amp;&amp; <span class="cmd">apt-get</span> upgrade -y
+<span class="cmd">date</span> -s <span class="str">"$(curl -sI https://www.google.com | grep -i '^date:' | sed 's/^[Dd]ate: //I' | tr -d '\r')"</span>
+
+<span class="cmt"># 2. Docker</span>
+<span class="cmd">curl</span> -fsSL https://get.docker.com | <span class="cmd">sh</span>
+<span class="cmd">systemctl</span> enable --now docker
+
+<span class="cmt"># 3. Firewall</span>
+<span class="cmd">ufw</span> allow 22/tcp &amp;&amp; <span class="cmd">ufw</span> allow 80/tcp &amp;&amp; <span class="cmd">ufw</span> --force enable
+
+<span class="cmt"># 4. Code</span>
+<span class="cmd">git</span> clone https://github.com/Mike5449/MonCash_BI.git /opt/moncash-portal
+<span class="cmd">cd</span> /opt/moncash-portal
+
+<span class="cmt"># 5. Configuration (ajuster IP + AZURE_* dans .env genere)</span>
+<span class="cmd">cp</span> .env.example .env
+<span class="cmd">nano</span> .env
+
+<span class="cmt"># 6. Build + demarrage</span>
+<span class="cmd">docker</span> compose build &amp;&amp; <span class="cmd">docker</span> compose up -d
+
+<span class="cmt"># 7. Verification</span>
+<span class="cmd">docker</span> compose ps
+<span class="cmd">curl</span> -sI http://localhost/</pre>
+</section>
+
+</main>
+</div>
+
+<footer>
+  MonCash BI Portal · Guide de Déploiement IT · v1.0 · 2026-07-17 · Digicel Haiti<br>
+  Source markdown : <a href="https://github.com/Mike5449/MonCash_BI/blob/main/GUIDE_DEPLOIEMENT_IT.md">GitHub</a>
+</footer>
+
+</body>
+</html>

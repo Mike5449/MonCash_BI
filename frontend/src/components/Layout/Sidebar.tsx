@@ -1,6 +1,5 @@
 import {
   Users,
-  Store,
   Receipt,
   ChevronDown,
   Home,
@@ -124,10 +123,10 @@ export function Sidebar() {
     { label: "B2B · Prefunded · Accounts",      to: "/prefunded/accounts",        group: "B2B" },
     { label: "B2B · Prefunded · Transactions",  to: "/prefunded/transactions",    group: "B2B" },
     { label: "B2B · Prefunded · Monthly Stats", to: "/prefunded/monthly-stats",   group: "B2B" },
-    { label: "Merchant · Accounts", to: "/merchants/accounts", group: "Merchant" },
-    { label: "Merchant · Transactions", to: "/merchants/transactions", group: "Merchant" },
-    { label: "Merchant · Monthly Stats", to: "/merchants/monthly-stats", group: "Merchant" },
-    { label: "Merchant · Active Merchants", to: "/merchants/active-merchants", group: "Merchant" },
+    { label: "B2B · Merchant · Accounts", to: "/merchants/accounts", group: "B2B" },
+    { label: "B2B · Merchant · Transactions", to: "/merchants/transactions", group: "B2B" },
+    { label: "B2B · Merchant · Monthly Stats", to: "/merchants/monthly-stats", group: "B2B" },
+    { label: "B2B · Merchant · Active Merchants", to: "/merchants/active-merchants", group: "B2B" },
     { label: "File Verification", to: "/enrich", group: "Tools" },
     { label: "Transaction History", to: "/tools/transaction-history", group: "Tools" },
     { label: "Agent OTC", to: "/tools/agent-otc", group: "Tools" },
@@ -241,17 +240,10 @@ export function Sidebar() {
                 { label: "Prefunded · Accounts",      to: "/prefunded/accounts" },
                 { label: "Prefunded · Transactions",  to: "/prefunded/transactions" },
                 { label: "Prefunded · Monthly Stats", to: "/prefunded/monthly-stats" },
-              ]}
-            />
-
-            <DropdownNavItem
-              icon={Store}
-              title="Merchant"
-              items={[
-                { label: "Accounts List",   to: "/merchants/accounts" },
-                { label: "Transactions",    to: "/merchants/transactions" },
-                { label: "Monthly Stats",   to: "/merchants/monthly-stats" },
-                { label: "Active Merchants", to: "/merchants/active-merchants" },
+                { label: "Merchant · Accounts",       to: "/merchants/accounts" },
+                { label: "Merchant · Transactions",   to: "/merchants/transactions" },
+                { label: "Merchant · Monthly Stats",  to: "/merchants/monthly-stats" },
+                { label: "Merchant · Active",         to: "/merchants/active-merchants" },
               ]}
             />
 
