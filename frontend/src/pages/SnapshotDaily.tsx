@@ -115,7 +115,7 @@ export default function SnapshotDaily() {
 
   return (
     <DashboardLayout>
-     <div ref={pageRef} style={{ background: 'var(--mc-bg)', padding: '4px' }}>
+     <div ref={pageRef} style={{ background: 'var(--surface-canvas)', padding: 'var(--space-1)' }}>
       <SnapshotHeader
         icon={<CalendarDays size={20} strokeWidth={1.75} />}
         title="MonCash KPIs Snapshot"
@@ -142,40 +142,40 @@ export default function SnapshotDaily() {
         busy={busy}
       />
 
-      {/* GRID — une seule grille parente pour aligner toutes les colonnes entre lignes */}
-      <div style={{ marginTop: '20px', overflowX: 'auto' }}>
+      {/* ── KPI GRID ─────────────────────────────────────────────── */}
+      <div style={{ marginTop: 'var(--space-6)', overflowX: 'auto' }}>
         <div style={{
           display: 'grid',
-          gridTemplateColumns: '180px repeat(4, minmax(auto, 1fr))',
-          gap: '10px',
+          gridTemplateColumns: '200px repeat(4, minmax(230px, 1fr))',
+          gap: 'var(--space-3)',
           alignItems: 'stretch',
         }}>
-          {/* COLUMN HEADERS */}
-          <div /> {/* row label slot */}
-          <ColumnHeader icon={<UsersIcon size={13} />} label="Subscribers" />
-          <ColumnHeader icon={<BarChart3 size={13} />} label="Volume" />
-          <ColumnHeader icon={<Wallet size={13} />}    label="Value" />
-          <ColumnHeader icon={<DollarSign size={13} />} label="Revenue" />
+          {/* Column headers */}
+          <div />
+          <ColumnHeader icon={<UsersIcon size={12} strokeWidth={1.75} />} label="Subscribers" />
+          <ColumnHeader icon={<BarChart3 size={12} strokeWidth={1.75} />} label="Volume" />
+          <ColumnHeader icon={<Wallet     size={12} strokeWidth={1.75} />} label="Value" />
+          <ColumnHeader icon={<DollarSign size={12} strokeWidth={1.75} />} label="Revenue" />
 
           {busy ? (
-            <div style={{ gridColumn: '1 / -1', padding: '80px 0', textAlign: 'center', color: '#94a3b8' }}>
-              <div className="spinner" style={{ margin: '0 auto 12px' }} />
-              <div style={{ fontWeight: '700', color: '#475569' }}>Loading snapshot…</div>
+            <div style={{ gridColumn: '1 / -1', padding: 'var(--space-16) 0', textAlign: 'center', color: 'var(--text-tertiary)' }}>
+              <div className="spinner" style={{ margin: '0 auto var(--space-3)' }} />
+              <div style={{ fontSize: 'var(--fs-body)', fontWeight: 500, color: 'var(--text-secondary)' }}>Loading snapshot…</div>
             </div>
           ) : sortedRows.length === 0 ? (
-            <div style={{ gridColumn: '1 / -1', padding: '80px 0', textAlign: 'center', color: '#94a3b8' }}>
-              <Minus size={28} style={{ opacity: 0.3 }} />
-              <div style={{ fontWeight: '700', color: '#475569', marginTop: '8px' }}>
-                Aucune donnée pour {submittedDate} ou {previewDate}.
+            <div style={{ gridColumn: '1 / -1', padding: 'var(--space-16) 0', textAlign: 'center', color: 'var(--text-tertiary)' }}>
+              <Minus size={22} strokeWidth={1.75} style={{ opacity: 0.35 }} />
+              <div style={{ fontSize: 'var(--fs-body)', fontWeight: 500, color: 'var(--text-secondary)', marginTop: 'var(--space-2)' }}>
+                No data for {submittedDate} or {previewDate}.
               </div>
             </div>
           ) : sortedRows.map((row: any) => (
             <div key={row.TR_TYPE} style={{ display: 'contents' }}>
               <RowLabel tr_type={row.TR_TYPE} />
-              <Cell metric="SUBS"    prev={row.PREV_SUBS}    curr={row.CURR_SUBS} />
-              <Cell metric="VOLUME"  prev={row.PREV_VOLUME}  curr={row.CURR_VOLUME} />
-              <Cell metric="VALUE"   prev={row.PREV_VALUE}   curr={row.CURR_VALUE} />
-              <Cell metric="REVENUE" prev={row.PREV_REVENUE} curr={row.CURR_REVENUE} />
+              <Cell prev={row.PREV_SUBS}    curr={row.CURR_SUBS} />
+              <Cell prev={row.PREV_VOLUME}  curr={row.CURR_VOLUME} />
+              <Cell prev={row.PREV_VALUE}   curr={row.CURR_VALUE} />
+              <Cell prev={row.PREV_REVENUE} curr={row.CURR_REVENUE} />
             </div>
           ))}
         </div>
@@ -186,17 +186,21 @@ export default function SnapshotDaily() {
   )
 }
 
-// --------- Subcomponents ---------
+/* ── Subcomponents ──────────────────────────────────────────────── */
 
 function ColumnHeader({ icon, label }: { icon: React.ReactNode, label: string }) {
   return (
     <div style={{
-      display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
-      fontSize: '11px', fontWeight: '800', color: '#0f172a',
-      textTransform: 'uppercase', letterSpacing: '0.5px',
-      padding: '6px 0',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      gap: 'var(--space-2)',
+      fontSize: 'var(--fs-micro)', fontWeight: 600,
+      color: 'var(--text-tertiary)',
+      textTransform: 'uppercase',
+      letterSpacing: 'var(--tracking-uppercase)',
+      padding: 'var(--space-2) 0 var(--space-3)',
+      borderBottom: '1px solid var(--border-default)',
     }}>
-      <span style={{ color: 'var(--mc-red)' }}>{icon}</span>
+      <span style={{ display: 'inline-flex', color: 'var(--text-tertiary)' }}>{icon}</span>
       {label}
     </div>
   )
@@ -205,25 +209,39 @@ function ColumnHeader({ icon, label }: { icon: React.ReactNode, label: string })
 function RowLabel({ tr_type }: { tr_type: string }) {
   const label = TR_TYPE_LABELS[tr_type] || tr_type
   const cat = CATEGORIES[tr_type]
-  const icon = cat === 'Inbound'
-    ? <ArrowDownCircle size={12} color="#059669" />
+  const isInbound = cat === 'Inbound'
+  const catColor = isInbound ? 'var(--positive)' : cat === 'Outbound' ? 'var(--negative)' : 'var(--text-muted)'
+  const icon = isInbound
+    ? <ArrowDownCircle size={11} strokeWidth={1.75} color="var(--positive)" />
     : cat === 'Outbound'
-      ? <ArrowUpCircle size={12} color="#b91c1c" />
+      ? <ArrowUpCircle size={11} strokeWidth={1.75} color="var(--negative)" />
       : null
   return (
     <div style={{
-      display: 'flex', alignItems: 'center', gap: '8px',
-      padding: '0 12px', minHeight: '64px',
-      borderRight: '1px solid var(--mc-border)',
+      display: 'flex', alignItems: 'center',
+      padding: 'var(--space-2) var(--space-3)',
+      minHeight: '68px',
+      borderRight: '1px solid var(--border-default)',
     }}>
       <div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-1)' }}>
           {icon}
-          <span style={{ fontSize: '10px', fontWeight: '800', color: cat === 'Inbound' ? '#059669' : '#b91c1c', textTransform: 'uppercase', letterSpacing: '0.4px' }}>
-            {cat || ''}
+          <span style={{
+            fontSize: 'var(--fs-micro)', fontWeight: 600,
+            color: catColor,
+            textTransform: 'uppercase',
+            letterSpacing: 'var(--tracking-uppercase)',
+          }}>
+            {cat || 'Other'}
           </span>
         </div>
-        <div style={{ fontSize: '14px', fontWeight: '800', color: '#0f172a', marginTop: '2px', letterSpacing: '-0.2px' }}>
+        <div style={{
+          fontSize: 'var(--fs-md)', fontWeight: 600,
+          color: 'var(--text-primary)',
+          marginTop: 'var(--space-1)',
+          letterSpacing: 'var(--tracking-tight)',
+          lineHeight: 1.2,
+        }}>
           {label}
         </div>
       </div>
@@ -231,7 +249,7 @@ function RowLabel({ tr_type }: { tr_type: string }) {
   )
 }
 
-function Cell({ prev, curr }: { metric: string, prev: any, curr: any }) {
+function Cell({ prev, curr }: { prev: any, curr: any }) {
   const p = Number(prev ?? 0)
   const c = Number(curr ?? 0)
   const diff = c - p
@@ -239,52 +257,68 @@ function Cell({ prev, curr }: { metric: string, prev: any, curr: any }) {
   const isUp = diff > 0
   const isFlat = diff === 0
 
-  const color = isFlat ? '#94a3b8' : isUp ? '#16a34a' : '#dc2626'
-  const bg    = isFlat ? '#f1f5f9' : isUp ? '#dcfce7' : '#fee2e2'
-  const TrendIcon = isFlat ? Minus : isUp ? TrendingUp : TrendingDown
+  const trendColor = isFlat ? 'var(--text-tertiary)' : isUp ? 'var(--positive)' : 'var(--negative)'
+  const trendBg    = isFlat ? 'var(--surface-muted)' : isUp ? 'var(--positive-soft)' : 'var(--negative-soft)'
+  const TrendIcon  = isFlat ? Minus : isUp ? TrendingUp : TrendingDown
 
   return (
     <div style={{
-      background: 'white',
-      border: '1px solid var(--mc-border)',
-      borderRadius: '6px',
-      padding: '10px 12px',
-      display: 'flex', flexDirection: 'column', gap: '8px',
-      transition: 'box-shadow 0.15s',
+      background: 'var(--surface-card)',
+      border: '1px solid var(--border-default)',
+      borderRadius: 'var(--radius-md)',
+      padding: 'var(--space-3)',
+      display: 'flex', flexDirection: 'column', gap: 'var(--space-2)',
     }}>
       {/* labels row */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', fontSize: '9px', fontWeight: '800', color: '#94a3b8', letterSpacing: '0.4px', textTransform: 'uppercase', textAlign: 'center' }}>
+      <div style={{
+        display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)',
+        fontSize: 'var(--fs-micro)', fontWeight: 600,
+        color: 'var(--text-tertiary)',
+        letterSpacing: 'var(--tracking-uppercase)',
+        textTransform: 'uppercase',
+        textAlign: 'center',
+      }}>
         <span>Prev</span>
         <span>Curr</span>
         <span>Diff</span>
         <span>Var</span>
       </div>
       {/* values row */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', alignItems: 'center', gap: '4px' }}>
-        <span style={{ fontSize: '12px', fontWeight: '700', color: '#475569', fontVariantNumeric: 'tabular-nums', textAlign: 'center', whiteSpace: 'nowrap' }}>
+      <div style={{
+        display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)',
+        alignItems: 'center', gap: 'var(--space-1)',
+        fontVariantNumeric: 'tabular-nums',
+      }}>
+        <span style={{
+          fontSize: 'var(--fs-body)', fontWeight: 500,
+          color: 'var(--text-secondary)',
+          textAlign: 'center', whiteSpace: 'nowrap',
+        }}>
           {fmtNum(p)}
         </span>
-        <span style={{ fontSize: '12px', fontWeight: '800', color: '#0f172a', fontVariantNumeric: 'tabular-nums', textAlign: 'center', whiteSpace: 'nowrap' }}>
+        <span style={{
+          fontSize: 'var(--fs-body)', fontWeight: 600,
+          color: 'var(--text-primary)',
+          textAlign: 'center', whiteSpace: 'nowrap',
+        }}>
           {fmtNum(c)}
         </span>
         <span style={{
-          fontSize: '11px', fontWeight: '800',
-          color, background: bg,
-          padding: '2px 6px', borderRadius: '5px',
-          textAlign: 'center', fontVariantNumeric: 'tabular-nums',
-          whiteSpace: 'nowrap',
+          fontSize: 'var(--fs-label)', fontWeight: 600,
+          color: trendColor, background: trendBg,
+          padding: '2px var(--space-2)', borderRadius: 'var(--radius-sm)',
+          textAlign: 'center', whiteSpace: 'nowrap',
         }}>
           {diff >= 0 ? '+' : '−'}{fmtNum(Math.abs(diff))}
         </span>
         <span style={{
-          fontSize: '11px', fontWeight: '800',
-          color, background: bg,
-          padding: '2px 6px', borderRadius: '5px',
+          fontSize: 'var(--fs-label)', fontWeight: 600,
+          color: trendColor, background: trendBg,
+          padding: '2px var(--space-2)', borderRadius: 'var(--radius-sm)',
           display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '3px',
-          fontVariantNumeric: 'tabular-nums',
           whiteSpace: 'nowrap',
         }}>
-          <TrendIcon size={10} />
+          <TrendIcon size={10} strokeWidth={2} />
           {fmtPct(varPct)}
         </span>
       </div>
