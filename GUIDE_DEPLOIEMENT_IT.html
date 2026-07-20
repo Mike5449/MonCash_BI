@@ -699,6 +699,9 @@ REFRESH_TOKEN_EXPIRE_DAYS=7
 <span class="cmt"># ── CORS ─────────────────────────────────────────────────────────</span>
 CORS_ORIGINS=http://${SERVER_IP},http://$(hostname),http://localhost
 
+<span class="cmt"># ── Trusted hosts (Host header allow-list) ──────────────────────</span>
+ALLOWED_HOSTS=$(hostname),${SERVER_IP},localhost,127.0.0.1
+
 <span class="cmt"># ── Cache TTL (10 min) ──────────────────────────────────────────</span>
 CACHE_DEFAULT_TTL=600
 
@@ -1080,6 +1083,7 @@ EOF
       <tr><td><code>ACCESS_TOKEN_EXPIRE_MINUTES</code></td><td>int</td><td>30</td><td>Durée validité access token</td></tr>
       <tr><td><code>REFRESH_TOKEN_EXPIRE_DAYS</code></td><td>int</td><td>7</td><td>Durée validité refresh token</td></tr>
       <tr><td><code>CORS_ORIGINS</code></td><td>CSV</td><td>(requis)</td><td>Origines browser autorisées</td></tr>
+      <tr><td><code>ALLOWED_HOSTS</code></td><td>CSV</td><td>*</td><td>Host header allow-list (TrustedHostMiddleware)</td></tr>
       <tr><td><code>CACHE_DEFAULT_TTL</code></td><td>int</td><td>600</td><td>TTL cache Redis (s)</td></tr>
       <tr><td><code>UVICORN_WORKERS</code></td><td>int</td><td>2</td><td>Workers backend</td></tr>
       <tr><td><code>WEB_PORT</code></td><td>int</td><td>80</td><td>Port host exposé</td></tr>

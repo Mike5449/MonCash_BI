@@ -812,6 +812,7 @@ docker stats --no-stream
 | `ACCESS_TOKEN_EXPIRE_MINUTES` | int | `30` | Durée validité access token |
 | `REFRESH_TOKEN_EXPIRE_DAYS` | int | `7` | Durée validité refresh token |
 | `CORS_ORIGINS` | CSV | (requis) | Origines browser autorisées |
+| `ALLOWED_HOSTS` | CSV | `*` | Host header allow-list (TrustedHostMiddleware) |
 | `CACHE_DEFAULT_TTL` | int | `600` | TTL cache Redis (secondes) |
 | `UVICORN_WORKERS` | int | `2` | Nombre workers backend |
 | `WEB_PORT` | int | `80` | Port host exposé |

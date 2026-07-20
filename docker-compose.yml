@@ -47,6 +47,10 @@ services:
       # aligned with any external host that might call the API directly.
       CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost}
 
+      # ── Trusted hosts — Host header allow-list. Comma-separated hostnames
+      # the FastAPI backend will accept. Leave empty to accept any host.
+      ALLOWED_HOSTS: ${ALLOWED_HOSTS:-}
+
       # ── Cache backend ─────────────────────────────────────────────────────
       CACHE_BACKEND: redis
       REDIS_URL:     redis://redis:6379/0

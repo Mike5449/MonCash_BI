@@ -130,10 +130,10 @@ app.state.limiter = limiter
 # Middleware — order matters: first added = outermost
 # ---------------------------------------------------------------------------
 
-# 1. Trusted hosts
+# 1. Trusted hosts (Host header allow-list, comma-separated in .env ALLOWED_HOSTS)
 app.add_middleware(
     TrustedHostMiddleware,
-    allowed_hosts=["localhost", "127.0.0.1", "*.yourdomain.com"],
+    allowed_hosts=settings.allowed_hosts_list,
 )
 
 # 2. CORS
