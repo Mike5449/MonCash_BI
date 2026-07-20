@@ -10,7 +10,7 @@ import {
   useMtdSnapshotByDimension,
 } from "../hooks/useAnalytics"
 import { exportNodeToPdf } from "../utils/pdfExport"
-import { SnapshotHeader, SnapshotFilterBar, useXlsxExport } from "../components/SnapshotChrome"
+import { SnapshotHeader, SnapshotFilterBar, useXlsxExport, SNAPSHOT_TREND } from "../components/SnapshotChrome"
 import "../premium.css"
 
 // ── Shared MonCash KPIs Snapshot · grouped by DEPARTMENT or CHANNEL ───────────
@@ -261,8 +261,8 @@ function Cell({ prev, curr }: { prev: any, curr: any }) {
   const isUp = diff > 0
   const isFlat = diff === 0
 
-  const color = isFlat ? '#94a3b8' : isUp ? '#16a34a' : '#dc2626'
-  const bg    = isFlat ? '#f1f5f9' : isUp ? '#dcfce7' : '#fee2e2'
+  const color = isFlat ? SNAPSHOT_TREND.FLAT_FG : isUp ? SNAPSHOT_TREND.UP_FG : SNAPSHOT_TREND.DOWN_FG
+  const bg    = isFlat ? SNAPSHOT_TREND.FLAT_BG : isUp ? SNAPSHOT_TREND.UP_BG : SNAPSHOT_TREND.DOWN_BG
   const TrendIcon = isFlat ? Minus : isUp ? TrendingUp : TrendingDown
 
   return (

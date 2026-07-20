@@ -7,7 +7,7 @@ import {
 import { DashboardLayout } from "../components/Layout/DashboardLayout"
 import { useSnapshotDailyByType } from "../hooks/useAnalytics"
 import { exportNodeToPdf } from "../utils/pdfExport"
-import { SnapshotHeader, SnapshotFilterBar, useXlsxExport } from "../components/SnapshotChrome"
+import { SnapshotHeader, SnapshotFilterBar, useXlsxExport, SNAPSHOT_TREND } from "../components/SnapshotChrome"
 import "../premium.css"
 
 const TR_TYPE_LABELS: Record<string, string> = {
@@ -257,8 +257,8 @@ function Cell({ prev, curr }: { prev: any, curr: any }) {
   const isUp = diff > 0
   const isFlat = diff === 0
 
-  const trendColor = isFlat ? 'var(--text-tertiary)' : isUp ? 'var(--positive)' : 'var(--negative)'
-  const trendBg    = isFlat ? 'var(--surface-muted)' : isUp ? 'var(--positive-soft)' : 'var(--negative-soft)'
+  const trendColor = isFlat ? SNAPSHOT_TREND.FLAT_FG : isUp ? SNAPSHOT_TREND.UP_FG : SNAPSHOT_TREND.DOWN_FG
+  const trendBg    = isFlat ? SNAPSHOT_TREND.FLAT_BG : isUp ? SNAPSHOT_TREND.UP_BG : SNAPSHOT_TREND.DOWN_BG
   const TrendIcon  = isFlat ? Minus : isUp ? TrendingUp : TrendingDown
 
   return (

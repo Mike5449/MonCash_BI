@@ -3,44 +3,57 @@ import { Calendar, RefreshCw, Download, FileText, ArrowRight } from "lucide-reac
 import { type ExportProgress } from "../utils/exportXlsx"
 import { ExportOverlay } from "./ExportOverlay"
 
-// ── Header + Filter chrome partagé entre les snapshots ────────────────────────
-// Centralise le visuel "page-header bandeau + filter card" appliqué identiquement
-// sur les 5 pages snapshot (Daily, MTD, BankWallet × WoW/MoM, Dimension × Daily/MTD).
-//
-// Apporte aussi le bouton Export Excel + l'ExportOverlay progress.
+// ── Shared header + filter chrome for all snapshot pages ─────────────────────
+// Centralises the "page-header card + filter card" chrome so every snapshot
+// (Daily, MTD, BankWallet × WoW/MoM, Dimension × Daily/MTD) has an identical
+// visual identity. Uses only design-system tokens (no hardcoded hex).
 
 const todayMinus1 = () => {
   const d = new Date(); d.setDate(d.getDate() - 1)
   return d.toISOString().split('T')[0]
 }
 
+// Slightly darker green/red used across snapshot pills — the design-system
+// -soft variants are too pale for high-density comparison cards.
+const UP_BG   = '#bbf7d0'   // green-200
+const UP_FG   = '#166534'   // green-800
+const DOWN_BG = '#fecaca'   // red-200
+const DOWN_FG = '#991b1b'   // red-800
+// Re-exported for the Cell components inside each snapshot page so they use
+// the same darker palette as the pills defined here.
+export const SNAPSHOT_TREND = {
+  UP_BG, UP_FG, DOWN_BG, DOWN_FG,
+  FLAT_BG: 'var(--surface-muted)',
+  FLAT_FG: 'var(--text-tertiary)',
+} as const
+
 // ───── HEADER ─────────────────────────────────────────────────────────────────
 
 export interface SnapshotHeaderProps {
-  /** Icône à gauche du titre (cercle rouge brand) */
+  /** Icon shown left of the title */
   icon: React.ReactNode
-  /** Titre principal (ex: "MonCash KPIs Snapshot") */
+  /** Main title (e.g. "MonCash KPIs Snapshot") */
   title: string
-  /** Sous-titre / suffixe du titre (ex: "By Department · MTD") */
+  /** Subtitle appended to the title (e.g. "By Department · MTD") */
   subtitle: string
-  /** Badge à droite du titre (ex: "WEEK-ON-WEEK", "MONTH-ON-MONTH") */
+  /** Right-side tag (e.g. "WEEK-ON-WEEK", "MONTH-ON-MONTH") */
   tag: string
-  /** Couleur du tag — défaut slate (WoW), rouge brand pour MoM */
+  /** Tag colour — slate for WoW, brand for MoM */
   tagColor?: 'slate' | 'brand'
-  /** Description complète (sous le titre) */
+  /** Full description under the title */
   description: React.ReactNode
-  /** Callback Refresh */
+  /** Refresh callback */
   onRefresh: () => void
-  /** État busy global */
+  /** Global busy state */
   busy: boolean
-  /** Données dispos (pour activer les boutons d'export) */
+  /** Whether data is available (enables the export buttons) */
   hasData: boolean
 
-  /** Excel export (optionnel — si absent, le bouton n'est pas affiché) */
+  /** Excel export (optional — the button is hidden when absent) */
   onExportXlsx?: () => Promise<void> | void
   isExportingXlsx?: boolean
 
-  /** PDF export (optionnel) */
+  /** PDF export (optional) */
   onExportPdf?: () => Promise<void> | void
   isExportingPdf?: boolean
 }
@@ -51,113 +64,121 @@ export function SnapshotHeader({
   onExportXlsx, isExportingXlsx,
   onExportPdf,  isExportingPdf,
 }: SnapshotHeaderProps) {
-  const tagBg = tagColor === 'brand' ? 'var(--mc-red)' : '#1e293b'
+  const tagBg = tagColor === 'brand' ? 'var(--brand)' : 'var(--text-primary)'
 
   return (
     <div style={{
-      background: 'white',
-      border: '1px solid var(--mc-border)',
-      borderRadius: '8px',
-      boxShadow: 'var(--mc-card-shadow)',
-      padding: '18px 22px',
+      background: 'var(--surface-card)',
+      border: '1px solid var(--border-default)',
+      borderRadius: 'var(--radius-md)',
+      padding: 'var(--space-4) var(--space-6)',
       display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-      gap: '20px', flexWrap: 'wrap',
-      position: 'relative', overflow: 'hidden',
+      gap: 'var(--space-4)', flexWrap: 'wrap',
     }}>
-      {/* Accent stripe rouge brand à gauche */}
-      <div style={{
-        position: 'absolute', left: 0, top: 0, bottom: 0,
-        width: '4px', background: 'var(--mc-red)',
-      }} />
-
-      {/* Bloc identité */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '14px', paddingLeft: '6px' }}>
+      {/* Identity block */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-4)' }}>
         <div style={{
-          width: '44px', height: '44px',
-          borderRadius: '10px',
-          background: 'linear-gradient(135deg, rgba(220, 38, 38, 0.10), rgba(220, 38, 38, 0.02))',
-          border: '1px solid rgba(220, 38, 38, 0.18)',
+          width: '38px', height: '38px',
+          borderRadius: 'var(--radius-md)',
+          background: 'var(--brand-soft)',
+          border: '1px solid var(--brand-border)',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          color: 'var(--mc-red)', flexShrink: 0,
+          color: 'var(--brand)', flexShrink: 0,
         }}>
           {icon}
         </div>
 
         <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-            <h1 className="page-title" style={{
-              margin: 0, fontSize: '18px', letterSpacing: '-0.3px',
+          <div style={{
+            fontSize: 'var(--fs-micro)', fontWeight: 500,
+            color: 'var(--text-tertiary)',
+            textTransform: 'uppercase',
+            letterSpacing: 'var(--tracking-uppercase)',
+            marginBottom: 'var(--space-1)',
+          }}>
+            Snapshot · {subtitle}
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)', flexWrap: 'wrap' }}>
+            <h1 style={{
+              margin: 0,
+              fontSize: 'var(--fs-lg)', fontWeight: 600,
+              color: 'var(--text-primary)',
+              letterSpacing: 'var(--tracking-tight)',
+              lineHeight: 1.2,
             }}>{title}</h1>
-            <span style={{ fontSize: '11px', fontWeight: 700, color: '#64748b', padding: '0 4px' }}>·</span>
-            <span style={{
-              fontSize: '15px', fontWeight: 700, color: '#0f172a',
-              letterSpacing: '-0.2px',
-            }}>{subtitle}</span>
             <span style={{
               background: tagBg, color: 'white',
-              fontSize: '10px', fontWeight: 800,
-              padding: '3px 8px',
-              borderRadius: '4px',
-              letterSpacing: '0.6px',
+              fontSize: 'var(--fs-micro)', fontWeight: 600,
+              padding: '2px var(--space-2)',
+              borderRadius: 'var(--radius-xs)',
+              letterSpacing: 'var(--tracking-uppercase)',
               textTransform: 'uppercase',
               whiteSpace: 'nowrap',
             }}>{tag}</span>
           </div>
-          <p className="page-subtitle" style={{ marginTop: '4px', fontSize: '12.5px' }}>
+          <p style={{
+            margin: 'var(--space-1) 0 0',
+            fontSize: 'var(--fs-body)',
+            color: 'var(--text-secondary)',
+          }}>
             {description}
           </p>
         </div>
       </div>
 
       {/* Actions */}
-      <div style={{ display: 'flex', gap: '8px' }}>
+      <div style={{ display: 'flex', gap: 'var(--space-2)' }}>
         <button onClick={onRefresh} disabled={busy} title="Refresh"
           style={{
-            background: 'white', color: 'var(--mc-text-main)',
-            border: '1px solid var(--mc-border)',
-            height: '38px', padding: '0 14px',
-            borderRadius: '6px', fontWeight: 700,
+            background: 'var(--surface-card)', color: 'var(--text-primary)',
+            border: '1px solid var(--border-default)',
+            height: '34px', padding: '0 var(--space-3)',
+            borderRadius: 'var(--radius-md)',
+            fontWeight: 500, fontSize: 'var(--fs-body)',
             cursor: busy ? 'wait' : 'pointer',
-            display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px',
+            display: 'flex', alignItems: 'center', gap: 'var(--space-2)',
+            opacity: busy ? 0.5 : 1,
           }}>
-          <RefreshCw size={14} className={busy ? "animate-spin" : ""} /> Refresh
+          <RefreshCw size={13} strokeWidth={1.75} className={busy ? "animate-spin" : ""} /> Refresh
         </button>
 
         {onExportXlsx && (
           <button onClick={onExportXlsx} disabled={!hasData || busy || !!isExportingXlsx}
-            title="Export Excel — Diff + Var précalculés"
+            title="Export Excel"
             style={{
-              background: (!hasData || busy || isExportingXlsx) ? '#cbd5e1' : '#059669',
-              color: 'white', border: 'none',
-              height: '38px', padding: '0 14px',
-              borderRadius: '6px', fontWeight: 800,
+              background: (!hasData || busy || isExportingXlsx) ? 'var(--surface-muted)' : 'var(--positive)',
+              color: (!hasData || busy || isExportingXlsx) ? 'var(--text-muted)' : 'white',
+              border: '1px solid ' + ((!hasData || busy || isExportingXlsx) ? 'var(--border-default)' : 'var(--positive)'),
+              height: '34px', padding: '0 var(--space-4)',
+              borderRadius: 'var(--radius-md)',
+              fontWeight: 500, fontSize: 'var(--fs-body)',
               cursor: (!hasData || busy || isExportingXlsx) ? 'not-allowed' : 'pointer',
-              display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px',
-              boxShadow: (!hasData || busy || isExportingXlsx) ? 'none' : '0 2px 4px rgba(5, 150, 105, 0.25)',
+              display: 'flex', alignItems: 'center', gap: 'var(--space-2)',
             }}>
             {isExportingXlsx
-              ? <RefreshCw size={14} className="animate-spin" />
-              : <Download size={14} />}
+              ? <RefreshCw size={13} strokeWidth={1.75} className="animate-spin" />
+              : <Download size={13} strokeWidth={1.75} />}
             {isExportingXlsx ? "Exporting…" : "Excel"}
           </button>
         )}
 
         {onExportPdf && (
           <button onClick={onExportPdf} disabled={!hasData || busy || !!isExportingPdf}
-            title="Télécharge la page en PDF"
+            title="Download page as PDF"
             style={{
-              background: (!hasData || busy || isExportingPdf) ? '#cbd5e1' : '#dc2626',
-              color: 'white', border: 'none',
-              height: '38px', padding: '0 14px',
-              borderRadius: '6px', fontWeight: 800,
+              background: (!hasData || busy || isExportingPdf) ? 'var(--surface-muted)' : 'var(--brand)',
+              color: (!hasData || busy || isExportingPdf) ? 'var(--text-muted)' : 'white',
+              border: '1px solid ' + ((!hasData || busy || isExportingPdf) ? 'var(--border-default)' : 'var(--brand)'),
+              height: '34px', padding: '0 var(--space-4)',
+              borderRadius: 'var(--radius-md)',
+              fontWeight: 500, fontSize: 'var(--fs-body)',
               cursor: (!hasData || busy || isExportingPdf) ? 'not-allowed' : 'pointer',
-              display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px',
-              boxShadow: (!hasData || busy || isExportingPdf) ? 'none' : '0 2px 4px rgba(220, 38, 38, 0.25)',
+              display: 'flex', alignItems: 'center', gap: 'var(--space-2)',
             }}>
             {isExportingPdf
-              ? <RefreshCw size={14} className="animate-spin" />
-              : <FileText size={14} />}
-            {isExportingPdf ? "Génération…" : "PDF"}
+              ? <RefreshCw size={13} strokeWidth={1.75} className="animate-spin" />
+              : <FileText size={13} strokeWidth={1.75} />}
+            {isExportingPdf ? "Generating…" : "PDF"}
           </button>
         )}
       </div>
@@ -168,22 +189,22 @@ export function SnapshotHeader({
 // ───── FILTER BAR ─────────────────────────────────────────────────────────────
 
 export interface SnapshotFilterBarProps {
-  /** Date local en cours d'édition */
+  /** Currently edited date (before Apply) */
   localReportDate: string
   setLocalReportDate: (v: string) => void
-  /** Date soumise (= currently applied) */
+  /** Submitted (applied) date */
   submittedDate: string
-  /** Callback Apply */
+  /** Apply callback */
   onApply: () => void
-  /** Période "preview" affichée à droite (badge vert) */
+  /** Preview period shown right-side */
   prevStart: string
   prevEnd:   string
-  prevLabel: string  // ex: "Preview Day", "Previous MTD"
-  /** Période "current" affichée à droite (badge bleu) */
+  prevLabel: string
+  /** Current period shown right-side */
   currStart: string
   currEnd:   string
-  currLabel: string  // ex: "Current Day", "Current MTD"
-  /** État busy */
+  currLabel: string
+  /** Busy state */
   busy: boolean
 }
 
@@ -193,74 +214,75 @@ export function SnapshotFilterBar({
   currStart, currEnd, currLabel,
   busy,
 }: SnapshotFilterBarProps) {
+  const dirty = localReportDate !== submittedDate
   return (
     <div style={{
-      background: 'white',
-      borderRadius: '8px',
-      border: '1px solid var(--mc-border)',
-      boxShadow: 'var(--mc-card-shadow)',
-      marginTop: '12px',
-      display: 'grid',
-      gridTemplateColumns: 'auto 1fr',
-      alignItems: 'stretch',
-      overflow: 'hidden',
+      background: 'var(--surface-card)',
+      borderRadius: 'var(--radius-md)',
+      border: '1px solid var(--border-default)',
+      marginTop: 'var(--space-3)',
+      padding: 'var(--space-4) var(--space-6)',
+      display: 'flex', alignItems: 'flex-end', flexWrap: 'wrap',
+      gap: 'var(--space-6)',
     }}>
-      {/* Bloc gauche — Date sélection */}
-      <div style={{
-        padding: '14px 20px',
-        background: 'linear-gradient(135deg, #fafbfc, #f1f5f9)',
-        borderRight: '1px solid var(--mc-border)',
-        display: 'flex', flexDirection: 'column', gap: '8px',
-        minWidth: '280px',
-      }}>
+      {/* Report date input */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>
+        <label style={{
+          fontSize: 'var(--fs-micro)', fontWeight: 600,
+          color: 'var(--text-tertiary)',
+          textTransform: 'uppercase',
+          letterSpacing: 'var(--tracking-uppercase)',
+        }}>Report date</label>
         <div style={{
-          display: 'flex', alignItems: 'center', gap: '6px',
-          fontSize: '10px', fontWeight: 800, textTransform: 'uppercase',
-          color: '#64748b', letterSpacing: '0.6px',
+          position: 'relative',
+          display: 'flex', alignItems: 'center',
+          background: 'var(--surface-card)',
+          border: '1px solid var(--border-default)',
+          borderRadius: 'var(--radius-md)',
         }}>
-          <Calendar size={12} color="var(--mc-red)" />
-          Report Date
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <Calendar size={13} strokeWidth={1.75} color="var(--text-tertiary)"
+            style={{ position: 'absolute', left: 'var(--space-3)', pointerEvents: 'none' }} />
           <input
             type="date"
-            className="search-input"
-            style={{
-              width: '160px', height: '36px',
-              marginBottom: 0, borderRadius: '6px',
-              fontWeight: 600, fontVariantNumeric: 'tabular-nums',
-            }}
             value={localReportDate}
             max={todayMinus1()}
             onChange={(e) => setLocalReportDate(e.target.value)}
-            onKeyDown={(e) => { if (e.key === 'Enter') onApply() }}
-          />
-          <button onClick={onApply} disabled={busy || localReportDate === submittedDate}
+            onKeyDown={(e) => { if (e.key === 'Enter' && dirty && !busy) onApply() }}
             style={{
-              background: 'var(--mc-red)', color: 'white', border: 'none',
-              height: '36px', padding: '0 18px',
-              borderRadius: '6px', fontWeight: 800,
-              cursor: (busy || localReportDate === submittedDate) ? 'not-allowed' : 'pointer',
-              fontSize: '12px', letterSpacing: '0.3px',
-              opacity: (busy || localReportDate === submittedDate) ? 0.5 : 1,
-              boxShadow: (busy || localReportDate === submittedDate) ? 'none' : '0 2px 4px rgba(220, 38, 38, 0.25)',
-            }}>
-            Apply
-          </button>
+              height: '38px', width: '170px',
+              paddingLeft: 'var(--space-8)', paddingRight: 'var(--space-2)',
+              border: 'none', background: 'transparent', outline: 'none',
+              fontWeight: 500, fontSize: 'var(--fs-body)',
+              fontVariantNumeric: 'tabular-nums',
+              color: 'var(--text-primary)',
+            }}
+          />
         </div>
       </div>
 
-      {/* Bloc droite — Period badges */}
+      <button onClick={onApply} disabled={busy || !dirty}
+        style={{
+          background: (busy || !dirty) ? 'var(--surface-muted)' : 'var(--brand)',
+          color: (busy || !dirty) ? 'var(--text-muted)' : 'white',
+          border: '1px solid ' + ((busy || !dirty) ? 'var(--border-default)' : 'var(--brand)'),
+          height: '38px', padding: '0 var(--space-5, 20px)',
+          borderRadius: 'var(--radius-md)',
+          fontWeight: 500, fontSize: 'var(--fs-body)',
+          cursor: (busy || !dirty) ? 'not-allowed' : 'pointer',
+        }}>
+        Apply
+      </button>
+
+      {/* Period badges */}
       <div style={{
-        padding: '14px 22px',
-        display: 'flex', alignItems: 'center', justifyContent: 'flex-end',
-        gap: '20px', flexWrap: 'wrap',
+        marginLeft: 'auto',
+        display: 'flex', alignItems: 'center',
+        gap: 'var(--space-4)', flexWrap: 'wrap',
+        paddingBottom: '2px',
       }}>
-        <SnapshotPeriodBadge
-          label={prevLabel} start={prevStart} end={prevEnd} accent="#059669" />
-        <ArrowRight size={18} color="#cbd5e1" strokeWidth={2} />
-        <SnapshotPeriodBadge
-          label={currLabel} start={currStart} end={currEnd} accent="#2563eb" current />
+        <SnapshotPeriodBadge label={prevLabel} start={prevStart} end={prevEnd} accent="var(--data-subs)" />
+        <ArrowRight size={14} strokeWidth={2} color="var(--text-muted)" />
+        <SnapshotPeriodBadge label={currLabel} start={currStart} end={currEnd} accent="var(--brand)" current />
       </div>
     </div>
   )
@@ -274,23 +296,22 @@ export function SnapshotPeriodBadge({ label, start, end, accent, current = false
   const sameDay = start && end && start === end
   return (
     <div style={{
-      position: 'relative',
       display: 'flex', flexDirection: 'column',
-      paddingLeft: '12px',
-      borderLeft: '3px solid ' + accent,
+      paddingLeft: 'var(--space-3)',
+      borderLeft: '2px solid ' + accent,
     }}>
       <span style={{
-        fontSize: '10px', fontWeight: 800,
+        fontSize: 'var(--fs-micro)', fontWeight: 600,
         color: accent,
-        textTransform: 'uppercase', letterSpacing: '0.6px',
+        textTransform: 'uppercase', letterSpacing: 'var(--tracking-uppercase)',
       }}>{label}</span>
       <span style={{
-        fontSize: current ? '14px' : '13px',
-        fontWeight: current ? 900 : 700,
-        color: 'var(--mc-text-main)',
+        fontSize: 'var(--fs-body)',
+        fontWeight: current ? 600 : 500,
+        color: 'var(--text-primary)',
         fontVariantNumeric: 'tabular-nums',
-        marginTop: '2px', whiteSpace: 'nowrap',
-        letterSpacing: '-0.2px',
+        marginTop: 'var(--space-1)',
+        whiteSpace: 'nowrap',
       }}>
         {sameDay ? start : (start && end ? `${start} → ${end}` : '—')}
       </span>
@@ -298,7 +319,7 @@ export function SnapshotPeriodBadge({ label, start, end, accent, current = false
   )
 }
 
-// ───── useXlsxExport — hook helper pour streamer un export Excel ─────────────
+// ───── useXlsxExport — hook helper to stream an Excel export ─────────────────
 
 export function useXlsxExport() {
   const [isExportingXlsx, setIsExportingXlsx] = useState(false)
@@ -347,7 +368,7 @@ export function useXlsxExport() {
     isExportingXlsx,
     exportProgress,
     downloadXlsx,
-    /** À monter dans le JSX (par exemple en fin de page) */
+    /** Mount this at the end of your JSX to show the progress overlay */
     overlay: <ExportOverlay progress={exportProgress} />,
   }
 }
