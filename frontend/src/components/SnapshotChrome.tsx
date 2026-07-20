@@ -22,8 +22,8 @@ export const SNAPSHOT_TREND = {
   UP_FG:   '#166534',   // green-800
   DOWN_BG: '#fecaca',   // red-200
   DOWN_FG: '#991b1b',   // red-800
-  FLAT_BG: '#fef08a',   // yellow-200 (neutral movement is highlighted, not hidden)
-  FLAT_FG: '#854d0e',   // yellow-800
+  FLAT_BG: '#fed7aa',   // orange-200 (neutral movement is highlighted, not hidden)
+  FLAT_FG: '#9a3412',   // orange-800
 } as const
 
 // ───── HEADER ─────────────────────────────────────────────────────────────────
