@@ -1,26 +1,15 @@
 import { useState, useMemo, useRef } from "react"
 import {
-  TrendingUp, TrendingDown, Minus,
+  Minus,
   Users as UsersIcon, BarChart3, Wallet, DollarSign,
   Building2, ArrowDownCircle, ArrowUpCircle,
 } from "lucide-react"
 import { DashboardLayout } from "../components/Layout/DashboardLayout"
 import { useBankWalletSnapshotDaily } from "../hooks/useAnalytics"
 import { exportNodeToPdf } from "../utils/pdfExport"
-import { SnapshotHeader, SnapshotFilterBar, useXlsxExport, SNAPSHOT_TREND } from "../components/SnapshotChrome"
+import { SnapshotHeader, SnapshotFilterBar, SnapshotCell, useXlsxExport } from "../components/SnapshotChrome"
 import "../premium.css"
 
-const fmtNum = (v: any) =>
-  Number(v ?? 0).toLocaleString('en-US', { maximumFractionDigits: 0 })
-
-const fmtPct = (v: number) =>
-  (v >= 0 ? '+' : '') + v.toFixed(2) + '%'
-
-const variation = (prev: number, curr: number): number => {
-  if (!prev && !curr) return 0
-  if (!prev) return 100
-  return ((curr - prev) / prev) * 100
-}
 
 const todayMinus1 = () => {
   const d = new Date(); d.setDate(d.getDate() - 1)
@@ -192,16 +181,16 @@ function BankBlock({ group }: { group: BankGroup }) {
     <div style={{ display: 'contents' }}>
       {/* Bank label (spans 2 rows via flex on label cell; we use 2 separate label cells in grid) */}
       <BankLabel bank={group.bank} direction="B2W" />
-      <Cell prev={b2w?.PREV_SUBS}    curr={b2w?.CURR_SUBS} />
-      <Cell prev={b2w?.PREV_VOLUME}  curr={b2w?.CURR_VOLUME} />
-      <Cell prev={b2w?.PREV_VALUE}   curr={b2w?.CURR_VALUE} />
-      <Cell prev={b2w?.PREV_REVENUE} curr={b2w?.CURR_REVENUE} />
+      <SnapshotCell prev={b2w?.PREV_SUBS}    curr={b2w?.CURR_SUBS} />
+      <SnapshotCell prev={b2w?.PREV_VOLUME}  curr={b2w?.CURR_VOLUME} />
+      <SnapshotCell prev={b2w?.PREV_VALUE}   curr={b2w?.CURR_VALUE} />
+      <SnapshotCell prev={b2w?.PREV_REVENUE} curr={b2w?.CURR_REVENUE} />
 
       <BankLabel bank={group.bank} direction="W2B" showBank={false} />
-      <Cell prev={w2b?.PREV_SUBS}    curr={w2b?.CURR_SUBS} />
-      <Cell prev={w2b?.PREV_VOLUME}  curr={w2b?.CURR_VOLUME} />
-      <Cell prev={w2b?.PREV_VALUE}   curr={w2b?.CURR_VALUE} />
-      <Cell prev={w2b?.PREV_REVENUE} curr={w2b?.CURR_REVENUE} />
+      <SnapshotCell prev={w2b?.PREV_SUBS}    curr={w2b?.CURR_SUBS} />
+      <SnapshotCell prev={w2b?.PREV_VOLUME}  curr={w2b?.CURR_VOLUME} />
+      <SnapshotCell prev={w2b?.PREV_VALUE}   curr={w2b?.CURR_VALUE} />
+      <SnapshotCell prev={w2b?.PREV_REVENUE} curr={w2b?.CURR_REVENUE} />
     </div>
   )
 }
@@ -247,77 +236,3 @@ function BankLabel({ bank, direction, showBank = true }: { bank: string, directi
   )
 }
 
-function Cell({ prev, curr }: { prev: any, curr: any }) {
-  const p = Number(prev ?? 0)
-  const c = Number(curr ?? 0)
-  const diff = c - p
-  const varPct = variation(p, c)
-  const isUp = diff > 0
-  const isFlat = diff === 0
-
-  const trendColor = isFlat ? SNAPSHOT_TREND.FLAT_FG : isUp ? SNAPSHOT_TREND.UP_FG : SNAPSHOT_TREND.DOWN_FG
-  const trendBg    = isFlat ? SNAPSHOT_TREND.FLAT_BG : isUp ? SNAPSHOT_TREND.UP_BG : SNAPSHOT_TREND.DOWN_BG
-  const TrendIcon  = isFlat ? Minus : isUp ? TrendingUp : TrendingDown
-
-  return (
-    <div style={{
-      background: 'var(--surface-card)',
-      border: '1px solid var(--border-default)',
-      borderRadius: 'var(--radius-md)',
-      padding: 'var(--space-3)',
-      display: 'flex', flexDirection: 'column', gap: 'var(--space-2)',
-    }}>
-      <div style={{
-        display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)',
-        fontSize: 'var(--fs-micro)', fontWeight: 600,
-        color: 'var(--text-tertiary)',
-        letterSpacing: 'var(--tracking-uppercase)',
-        textTransform: 'uppercase',
-        textAlign: 'center',
-      }}>
-        <span>Prev</span>
-        <span>Curr</span>
-        <span>Diff</span>
-        <span>Var</span>
-      </div>
-      <div style={{
-        display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)',
-        alignItems: 'center', gap: 'var(--space-1)',
-        fontVariantNumeric: 'tabular-nums',
-      }}>
-        <span style={{
-          fontSize: 'var(--fs-body)', fontWeight: 500,
-          color: 'var(--text-secondary)',
-          textAlign: 'center', whiteSpace: 'nowrap',
-        }}>
-          {fmtNum(p)}
-        </span>
-        <span style={{
-          fontSize: 'var(--fs-body)', fontWeight: 600,
-          color: 'var(--text-primary)',
-          textAlign: 'center', whiteSpace: 'nowrap',
-        }}>
-          {fmtNum(c)}
-        </span>
-        <span style={{
-          fontSize: 'var(--fs-label)', fontWeight: 600,
-          color: trendColor, background: trendBg,
-          padding: '2px var(--space-2)', borderRadius: 'var(--radius-sm)',
-          textAlign: 'center', whiteSpace: 'nowrap',
-        }}>
-          {diff >= 0 ? '+' : '−'}{fmtNum(Math.abs(diff))}
-        </span>
-        <span style={{
-          fontSize: 'var(--fs-label)', fontWeight: 600,
-          color: trendColor, background: trendBg,
-          padding: '2px var(--space-2)', borderRadius: 'var(--radius-sm)',
-          display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '3px',
-          whiteSpace: 'nowrap',
-        }}>
-          <TrendIcon size={10} strokeWidth={2} />
-          {fmtPct(varPct)}
-        </span>
-      </div>
-    </div>
-  )
-}

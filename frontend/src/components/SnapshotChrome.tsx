@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { Calendar, RefreshCw, Download, FileText, ArrowRight } from "lucide-react"
+import { Calendar, RefreshCw, Download, FileText, ArrowRight, TrendingUp, TrendingDown, Minus } from "lucide-react"
 import { type ExportProgress } from "../utils/exportXlsx"
 import { ExportOverlay } from "./ExportOverlay"
 
@@ -314,6 +314,94 @@ export function SnapshotPeriodBadge({ label, start, end, accent, current = false
       }}>
         {sameDay ? start : (start && end ? `${start} → ${end}` : '—')}
       </span>
+    </div>
+  )
+}
+
+// ───── SNAPSHOT CELL ──────────────────────────────────────────────────────────
+// Comparison card shown in every snapshot page (Prev / Curr / Diff / Var).
+// Fonts intentionally tuned small so long numbers (7-8 digits + commas) fit
+// in the ~55px sub-column without clipping in PDF exports.
+
+const fmtNum = (v: number) => Number(v ?? 0).toLocaleString('en-US', { maximumFractionDigits: 0 })
+const fmtPct = (v: number) => (v >= 0 ? '+' : '') + v.toFixed(1) + '%'
+const cellVariation = (prev: number, curr: number): number => {
+  if (!prev && !curr) return 0
+  if (!prev) return 100
+  return ((curr - prev) / prev) * 100
+}
+
+export function SnapshotCell({ prev, curr }: { prev: any, curr: any }) {
+  const p = Number(prev ?? 0)
+  const c = Number(curr ?? 0)
+  const diff = c - p
+  const varPct = cellVariation(p, c)
+  const isUp = diff > 0
+  const isFlat = diff === 0
+
+  const trendColor = isFlat ? SNAPSHOT_TREND.FLAT_FG : isUp ? SNAPSHOT_TREND.UP_FG : SNAPSHOT_TREND.DOWN_FG
+  const trendBg    = isFlat ? SNAPSHOT_TREND.FLAT_BG : isUp ? SNAPSHOT_TREND.UP_BG : SNAPSHOT_TREND.DOWN_BG
+  const TrendIcon  = isFlat ? Minus : isUp ? TrendingUp : TrendingDown
+
+  return (
+    <div style={{
+      background: 'var(--surface-card)',
+      border: '1px solid var(--border-default)',
+      borderRadius: 'var(--radius-md)',
+      padding: 'var(--space-3)',
+      display: 'flex', flexDirection: 'column', gap: 'var(--space-2)',
+    }}>
+      <div style={{
+        display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)',
+        fontSize: 'var(--fs-micro)', fontWeight: 600,
+        color: 'var(--text-tertiary)',
+        letterSpacing: 'var(--tracking-uppercase)',
+        textTransform: 'uppercase',
+        textAlign: 'center',
+      }}>
+        <span>Prev</span>
+        <span>Curr</span>
+        <span>Diff</span>
+        <span>Var</span>
+      </div>
+      <div style={{
+        display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)',
+        alignItems: 'center', gap: 'var(--space-1)',
+        fontVariantNumeric: 'tabular-nums',
+      }}>
+        <span style={{
+          fontSize: 'var(--fs-label)', fontWeight: 500,
+          color: 'var(--text-secondary)',
+          textAlign: 'center', whiteSpace: 'nowrap',
+        }}>
+          {fmtNum(p)}
+        </span>
+        <span style={{
+          fontSize: 'var(--fs-label)', fontWeight: 600,
+          color: 'var(--text-primary)',
+          textAlign: 'center', whiteSpace: 'nowrap',
+        }}>
+          {fmtNum(c)}
+        </span>
+        <span style={{
+          fontSize: 'var(--fs-micro)', fontWeight: 600,
+          color: trendColor, background: trendBg,
+          padding: '2px var(--space-1)', borderRadius: 'var(--radius-sm)',
+          textAlign: 'center', whiteSpace: 'nowrap',
+        }}>
+          {diff >= 0 ? '+' : '−'}{fmtNum(Math.abs(diff))}
+        </span>
+        <span style={{
+          fontSize: 'var(--fs-micro)', fontWeight: 600,
+          color: trendColor, background: trendBg,
+          padding: '2px var(--space-1)', borderRadius: 'var(--radius-sm)',
+          display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '2px',
+          whiteSpace: 'nowrap',
+        }}>
+          <TrendIcon size={9} strokeWidth={2} />
+          {fmtPct(varPct)}
+        </span>
+      </div>
     </div>
   )
 }

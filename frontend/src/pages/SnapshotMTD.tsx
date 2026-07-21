@@ -1,13 +1,13 @@
 import { useState, useMemo, useRef } from "react"
 import {
-  TrendingUp, TrendingDown, Minus,
+  Minus,
   Users as UsersIcon, BarChart3, Wallet, DollarSign, ArrowDownCircle, ArrowUpCircle,
   CalendarRange,
 } from "lucide-react"
 import { DashboardLayout } from "../components/Layout/DashboardLayout"
 import { useMtdSnapshotByType } from "../hooks/useAnalytics"
 import { exportNodeToPdf } from "../utils/pdfExport"
-import { SnapshotHeader, SnapshotFilterBar, useXlsxExport, SNAPSHOT_TREND } from "../components/SnapshotChrome"
+import { SnapshotHeader, SnapshotFilterBar, SnapshotCell, useXlsxExport } from "../components/SnapshotChrome"
 import "../premium.css"
 
 const TR_TYPE_LABELS: Record<string, string> = {
@@ -38,17 +38,6 @@ const CATEGORIES: Record<string, 'Inbound' | 'Outbound'> = {
   SELF_TOPUP: 'Outbound', W2B: 'Outbound',
 }
 
-const fmtNum = (v: any) =>
-  Number(v ?? 0).toLocaleString('en-US', { maximumFractionDigits: 0 })
-
-const fmtPct = (v: number) =>
-  (v >= 0 ? '+' : '') + v.toFixed(1) + '%'
-
-const variation = (prev: number, curr: number): number => {
-  if (!prev && !curr) return 0
-  if (!prev) return 100
-  return ((curr - prev) / prev) * 100
-}
 
 const todayMinus1 = () => {
   const d = new Date(); d.setDate(d.getDate() - 1)
@@ -171,10 +160,10 @@ export default function SnapshotMTD() {
           ) : sortedRows.map((row: any) => (
             <div key={row.TR_TYPE} style={{ display: 'contents' }}>
               <RowLabel tr_type={row.TR_TYPE} />
-              <Cell prev={row.PREV_SUBS}    curr={row.CURR_SUBS} />
-              <Cell prev={row.PREV_VOLUME}  curr={row.CURR_VOLUME} />
-              <Cell prev={row.PREV_VALUE}   curr={row.CURR_VALUE} />
-              <Cell prev={row.PREV_REVENUE} curr={row.CURR_REVENUE} />
+              <SnapshotCell prev={row.PREV_SUBS}    curr={row.CURR_SUBS} />
+              <SnapshotCell prev={row.PREV_VOLUME}  curr={row.CURR_VOLUME} />
+              <SnapshotCell prev={row.PREV_VALUE}   curr={row.CURR_VALUE} />
+              <SnapshotCell prev={row.PREV_REVENUE} curr={row.CURR_REVENUE} />
             </div>
           ))}
         </div>
@@ -248,77 +237,3 @@ function RowLabel({ tr_type }: { tr_type: string }) {
   )
 }
 
-function Cell({ prev, curr }: { prev: any, curr: any }) {
-  const p = Number(prev ?? 0)
-  const c = Number(curr ?? 0)
-  const diff = c - p
-  const varPct = variation(p, c)
-  const isUp = diff > 0
-  const isFlat = diff === 0
-
-  const trendColor = isFlat ? SNAPSHOT_TREND.FLAT_FG : isUp ? SNAPSHOT_TREND.UP_FG : SNAPSHOT_TREND.DOWN_FG
-  const trendBg    = isFlat ? SNAPSHOT_TREND.FLAT_BG : isUp ? SNAPSHOT_TREND.UP_BG : SNAPSHOT_TREND.DOWN_BG
-  const TrendIcon  = isFlat ? Minus : isUp ? TrendingUp : TrendingDown
-
-  return (
-    <div style={{
-      background: 'var(--surface-card)',
-      border: '1px solid var(--border-default)',
-      borderRadius: 'var(--radius-md)',
-      padding: 'var(--space-3)',
-      display: 'flex', flexDirection: 'column', gap: 'var(--space-2)',
-    }}>
-      <div style={{
-        display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)',
-        fontSize: 'var(--fs-micro)', fontWeight: 600,
-        color: 'var(--text-tertiary)',
-        letterSpacing: 'var(--tracking-uppercase)',
-        textTransform: 'uppercase',
-        textAlign: 'center',
-      }}>
-        <span>Prev</span>
-        <span>Curr</span>
-        <span>Diff</span>
-        <span>Var</span>
-      </div>
-      <div style={{
-        display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)',
-        alignItems: 'center', gap: 'var(--space-1)',
-        fontVariantNumeric: 'tabular-nums',
-      }}>
-        <span style={{
-          fontSize: 'var(--fs-body)', fontWeight: 500,
-          color: 'var(--text-secondary)',
-          textAlign: 'center', whiteSpace: 'nowrap',
-        }}>
-          {fmtNum(p)}
-        </span>
-        <span style={{
-          fontSize: 'var(--fs-body)', fontWeight: 600,
-          color: 'var(--text-primary)',
-          textAlign: 'center', whiteSpace: 'nowrap',
-        }}>
-          {fmtNum(c)}
-        </span>
-        <span style={{
-          fontSize: 'var(--fs-label)', fontWeight: 600,
-          color: trendColor, background: trendBg,
-          padding: '2px var(--space-2)', borderRadius: 'var(--radius-sm)',
-          textAlign: 'center', whiteSpace: 'nowrap',
-        }}>
-          {diff >= 0 ? '+' : '−'}{fmtNum(Math.abs(diff))}
-        </span>
-        <span style={{
-          fontSize: 'var(--fs-label)', fontWeight: 600,
-          color: trendColor, background: trendBg,
-          padding: '2px var(--space-2)', borderRadius: 'var(--radius-sm)',
-          display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '3px',
-          whiteSpace: 'nowrap',
-        }}>
-          <TrendIcon size={10} strokeWidth={2} />
-          {fmtPct(varPct)}
-        </span>
-      </div>
-    </div>
-  )
-}
