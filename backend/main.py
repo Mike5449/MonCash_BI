@@ -111,6 +111,9 @@ app = FastAPI(
         "## Secure base system API\n\n"
         "Domain-driven architecture for MonCash BI auditing."
     ),
+    # When served behind nginx at /api/*, root_path lets Swagger UI resolve the
+    # OpenAPI schema and the "Try it out" requests through the same prefix.
+    root_path=settings.ROOT_PATH,
     openapi_tags=TAGS_METADATA,
     swagger_ui_parameters={
         "persistAuthorization": True,

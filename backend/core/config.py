@@ -25,6 +25,11 @@ class Settings(BaseSettings):
     # specific comma-separated list in production to reject spoofed Host headers.
     ALLOWED_HOSTS: str = ""
 
+    # Reverse proxy path prefix. When the API is served behind nginx at /api/*
+    # (as in the Docker Compose stack), set ROOT_PATH=/api so FastAPI generates
+    # Swagger UI + OpenAPI URLs with that prefix. Empty when running directly.
+    ROOT_PATH: str = ""
+
     # Brute-force protection
     MAX_LOGIN_ATTEMPTS: int = 5
     ACCOUNT_LOCKOUT_MINUTES: int = 15

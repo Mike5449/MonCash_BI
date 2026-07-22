@@ -51,6 +51,11 @@ services:
       # the FastAPI backend will accept. Leave empty to accept any host.
       ALLOWED_HOSTS: ${ALLOWED_HOSTS:-}
 
+      # ── Reverse-proxy prefix — nginx serves the backend at /api/*, so
+      # root_path=/api lets Swagger UI resolve the OpenAPI schema + Try-it-out
+      # requests through the same prefix.
+      ROOT_PATH: ${ROOT_PATH:-/api}
+
       # ── Cache backend ─────────────────────────────────────────────────────
       CACHE_BACKEND: redis
       REDIS_URL:     redis://redis:6379/0
