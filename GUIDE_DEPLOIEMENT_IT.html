@@ -932,6 +932,55 @@ EOF
   </ul>
 <pre><span class="cmt"># Copier .env vers un stockage securise</span>
 <span class="cmd">cp</span> /opt/moncash-portal/.env /backups/moncash-portal-env-$(<span class="cmd">date</span> +%Y%m%d).bak</pre>
+
+  <h3>12.8 Flush automatique du cache Redis (1 AM heure Haïti)</h3>
+  <p>Puisque les données Databricks sont <strong>J-1</strong> (ETL nocturne), le cache est configuré pour tenir 25 heures (<code>CACHE_DEFAULT_TTL=90000</code> dans <code>.env</code>) et est <strong>vidé totalement chaque nuit à 1 AM heure Haïti</strong> par un cron sur l'hôte. Les utilisateurs voient ainsi les données rafraîchies dès le début de la journée suivante sans réveiller inutilement le SQL warehouse Databricks pendant la journée.</p>
+  <p><strong>Installation du cron flush (setup one-shot)</strong> — à faire après le déploiement :</p>
+<pre><span class="cmt"># 1. Verifier que le fuseau America/Port-au-Prince est dispo</span>
+<span class="cmd">timedatectl</span> list-timezones | <span class="cmd">grep</span> -i port-au-prince
+
+<span class="cmt"># 2. Nettoyer toute vieille entree</span>
+<span class="cmd">crontab</span> -l 2&gt;/dev/null | <span class="cmd">grep</span> -vE <span class="str">"FLUSHDB|moncash-cache-flush|CRON_TZ=America/Port-au-Prince"</span> | <span class="cmd">crontab</span> -
+
+<span class="cmt"># 3. Ajouter la nouvelle entree (CRON_TZ gere DST auto)</span>
+(<span class="cmd">crontab</span> -l 2&gt;/dev/null; \
+ <span class="cmd">echo</span> <span class="str">""</span>; \
+ <span class="cmd">echo</span> <span class="str">"# --- MonCash BI : flush cache Redis quotidien a 1 AM heure Haiti ---"</span>; \
+ <span class="cmd">echo</span> <span class="str">"CRON_TZ=America/Port-au-Prince"</span>; \
+ <span class="cmd">echo</span> <span class="str">"0 1 * * * cd /opt/moncash-portal &amp;&amp; /usr/bin/docker compose exec -T redis redis-cli FLUSHDB &gt;&gt; /var/log/moncash-cache-flush.log 2&gt;&amp;1"</span>; \
+) | <span class="cmd">crontab</span> -
+
+<span class="cmt"># 4. Log file + rotation weekly (garde 4 semaines compresses)</span>
+<span class="cmd">touch</span> /var/log/moncash-cache-flush.log
+<span class="cmd">chmod</span> 644 /var/log/moncash-cache-flush.log
+<span class="cmd">cat</span> &gt; /etc/logrotate.d/moncash-cache-flush &lt;&lt; <span class="str">'EOF'</span>
+/var/log/moncash-cache-flush.log {
+    weekly
+    rotate 4
+    compress
+    delaycompress
+    missingok
+    notifempty
+    create 644 root root
+}
+EOF
+
+<span class="cmt"># 5. Test manuel immediat</span>
+<span class="cmd">cd</span> /opt/moncash-portal &amp;&amp; <span class="cmd">docker</span> compose exec -T redis redis-cli FLUSHDB</pre>
+
+  <p><strong>Vérifier le lendemain matin :</strong></p>
+<pre><span class="cmt"># Doit contenir une ligne datee d'environ 1 AM heure Haiti (5 AM UTC en ete, 6 AM UTC en hiver)</span>
+<span class="cmd">tail</span> /var/log/moncash-cache-flush.log
+
+<span class="cmt"># Historique cron systeme</span>
+<span class="cmd">journalctl</span> -u cron.service --since <span class="str">"yesterday 23:00"</span> | <span class="cmd">grep</span> -iE <span class="str">"moncash|FLUSHDB"</span></pre>
+
+  <p><strong>Désactiver temporairement le flush</strong> (pour maintenance ou tests) :</p>
+<pre><span class="cmt"># Commenter la ligne cron</span>
+<span class="cmd">crontab</span> -l | <span class="cmd">sed</span> <span class="str">'/FLUSHDB/s/^/#/'</span> | <span class="cmd">crontab</span> -
+
+<span class="cmt"># Reactiver plus tard</span>
+<span class="cmd">crontab</span> -l | <span class="cmd">sed</span> <span class="str">'/FLUSHDB/s/^#//'</span> | <span class="cmd">crontab</span> -</pre>
 </section>
 
 <!-- ═══════════════════════════════════════════════════════════════ -->

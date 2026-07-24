@@ -638,6 +638,70 @@ docker system prune -a --volumes -f
 cp /opt/moncash-portal/.env /backups/moncash-portal-env-$(date +%Y%m%d).bak
 ```
 
+### 12.8 Flush automatique du cache Redis (1 AM heure Haïti)
+
+Puisque les données Databricks sont **J-1** (ETL nocturne), le cache est configuré
+pour tenir 25 heures (`CACHE_DEFAULT_TTL=90000` dans `.env`) et est **vidé
+totalement chaque nuit à 1 AM heure Haïti** par un cron sur l'hôte. Cela garantit
+que les utilisateurs voient les données rafraîchies dès le début de la journée
+suivante sans réveiller inutilement le SQL warehouse Databricks pendant la journée.
+
+**Installation du cron flush (setup one-shot)** — à faire après le déploiement :
+
+```bash
+# 1. Verifier que le fuseau America/Port-au-Prince est dispo
+timedatectl list-timezones | grep -i port-au-prince
+
+# 2. Nettoyer toute vieille entree
+crontab -l 2>/dev/null | grep -vE "FLUSHDB|moncash-cache-flush|CRON_TZ=America/Port-au-Prince" | crontab -
+
+# 3. Ajouter la nouvelle entree (CRON_TZ gere DST auto)
+(crontab -l 2>/dev/null; \
+ echo ""; \
+ echo "# --- MonCash BI : flush cache Redis quotidien a 1 AM heure Haiti ---"; \
+ echo "CRON_TZ=America/Port-au-Prince"; \
+ echo "0 1 * * * cd /opt/moncash-portal && /usr/bin/docker compose exec -T redis redis-cli FLUSHDB >> /var/log/moncash-cache-flush.log 2>&1"; \
+) | crontab -
+
+# 4. Log file + rotation weekly (garde 4 semaines compresses)
+touch /var/log/moncash-cache-flush.log
+chmod 644 /var/log/moncash-cache-flush.log
+cat > /etc/logrotate.d/moncash-cache-flush << 'EOF'
+/var/log/moncash-cache-flush.log {
+    weekly
+    rotate 4
+    compress
+    delaycompress
+    missingok
+    notifempty
+    create 644 root root
+}
+EOF
+
+# 5. Test manuel immediat
+cd /opt/moncash-portal && docker compose exec -T redis redis-cli FLUSHDB
+```
+
+**Vérifier le lendemain matin :**
+
+```bash
+# Doit contenir une ligne datee d'environ 1 AM heure Haiti (5 AM UTC en ete, 6 AM UTC en hiver)
+tail /var/log/moncash-cache-flush.log
+
+# Historique cron systeme
+journalctl -u cron.service --since "yesterday 23:00" | grep -iE "moncash|FLUSHDB"
+```
+
+**Désactiver temporairement le flush** (pour maintenance ou tests) :
+
+```bash
+# Commenter la ligne cron
+crontab -l | sed '/FLUSHDB/s/^/#/' | crontab -
+
+# Reactiver plus tard
+crontab -l | sed '/FLUSHDB/s/^#//' | crontab -
+```
+
 ---
 
 ## 13. Dépannage
