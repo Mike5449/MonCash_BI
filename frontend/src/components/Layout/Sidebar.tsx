@@ -26,7 +26,7 @@ const NavItem = ({ icon: LucideIcon, children, to, active = false }: any) => {
   return (
     <Link to={to} className={`nav-item ${active ? 'active' : ''}`}>
       <span className="nav-item-indicator" />
-      <LucideIcon size={18} />
+      <LucideIcon size={17} />
       <span className="nav-item-label">{children}</span>
     </Link>
   )
@@ -44,13 +44,14 @@ const DropdownNavItem = ({ icon: LucideIcon, title, items }: { icon: any, title:
         onClick={() => setIsOpen(!isOpen)}
       >
         <span className="nav-item-indicator" />
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1 }}>
-          <LucideIcon size={18} />
+        <div style={{ display: 'flex', alignItems: 'center', gap: '11px', flex: 1, minWidth: 0 }}>
+          <LucideIcon size={17} />
           <span className="nav-item-label">{title}</span>
         </div>
+        <span className="nav-count">{items.length}</span>
         <ChevronDown
           size={14}
-          style={{ transform: isOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s', opacity: 0.55 }}
+          style={{ transform: isOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s', opacity: 0.5, flexShrink: 0 }}
         />
       </div>
 
@@ -296,31 +297,7 @@ export function Sidebar() {
             onClick={handleLogout}
             title="Log out"
             aria-label="Log out"
-            style={{
-              display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-              gap: '6px',
-              height: '30px', padding: '0 10px',
-              background: 'transparent',
-              color: 'rgba(255,255,255,0.75)',
-              border: '1px solid rgba(255,255,255,0.18)',
-              borderRadius: '6px',
-              fontSize: '11px', fontWeight: 600,
-              letterSpacing: '0.04em', textTransform: 'uppercase',
-              cursor: 'pointer',
-              transition: 'background 0.15s, color 0.15s, border-color 0.15s',
-            }}
-            onMouseEnter={(e) => {
-              const t = e.currentTarget
-              t.style.background = 'rgba(227, 27, 35, 0.18)'
-              t.style.color = '#fff'
-              t.style.borderColor = 'rgba(227, 27, 35, 0.6)'
-            }}
-            onMouseLeave={(e) => {
-              const t = e.currentTarget
-              t.style.background = 'transparent'
-              t.style.color = 'rgba(255,255,255,0.75)'
-              t.style.borderColor = 'rgba(255,255,255,0.18)'
-            }}
+            className="sidebar-logout"
           >
             <LogOut size={13} strokeWidth={2} />
             <span>Out</span>

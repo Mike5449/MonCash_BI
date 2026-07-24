@@ -89,6 +89,12 @@ services:
       - backend
     ports:
       - "${WEB_PORT:-80}:80"
+      - "${WEB_PORT_HTTPS:-443}:443"
+    volumes:
+      # TLS material (cert + key) mounted read-only from host. Points to a
+      # directory containing moncash-bi.crt and moncash-bi.key (nginx.conf
+      # references /etc/nginx/ssl/moncash-bi.{crt,key}).
+      - ${SSL_CERT_DIR:-/etc/ssl/moncash-bi}:/etc/nginx/ssl:ro
     networks:
       - bi-net
     logging:
