@@ -292,7 +292,7 @@ export default function AgentOtc() {
       }}>
         <KpiCard label="Agents"               value={fmtNum(totals.agentsCount)}     accent="var(--data-subs)"    sub="agents with ≥1 OTC tx" />
         <KpiCard label="Volume"               value={fmtNum(totals.volume)}          accent="var(--data-volume)"  sub="distinct transactions" />
-        <KpiCard label="Total TR value (HTG)" value={fmtMoney(totals.totalValue)}    accent="var(--data-value)"   sub="sum of amounts ÷ 2" />
+        <KpiCard label="Total TR value (HTG)" value={fmtMoney(totals.totalValue)}    accent="var(--data-value)"   sub="sum of amounts" />
       </div>
 
       {/* ── TABLE · newspaper-style ── */}
