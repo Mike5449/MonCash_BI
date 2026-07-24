@@ -2310,6 +2310,7 @@ class CustomerTransactionRepository:
         start_date: date,
         end_date: date,
         date_code: Optional[str] = None,
+        limit: Optional[int] = None,
     ) -> List[Dict[str, Any]]:
         """
         Agents OTC : somme des transactions Cash In OTC / Agent Payment to Agent
@@ -2319,8 +2320,10 @@ class CustomerTransactionRepository:
             start_date / end_date : période des transactions (inclusive both sides)
             date_code : snapshot du profil agent (format yyyyMMdd).
                         Si None, on prend le MAX(DATE_CODE) disponible.
+            limit     : nombre max de lignes retournees (ORDER BY TR_VALUE DESC).
+                        None = pas de limite (utile pour l'export CSV/XLSX).
 
-        Returns: list de {AGENT_MSISDN (formaté (509)XXXXXXXX), AGENT_NAME, TR_VALUE, volume_, AGENT_ADRESS}
+        Returns: list de {AGENT_MSISDN (formaté (509)XXXXXXXX), AGENT_NAME, TR_VALUE, VOLUME_, AGENT_ADRESS}
         """
         if not start_date or not end_date:
             raise ValueError("start_date and end_date are required")
@@ -2341,22 +2344,49 @@ class CustomerTransactionRepository:
                 "DATE_CODE = (SELECT MAX(DATE_CODE) FROM hive_metastore.ods_dl.ods_mfs_agent)"
             )
 
+        # LIMIT anti-injection : cast en int strict, None = pas de limite
+        limit_clause = ""
+        if limit is not None:
+            try:
+                lim = int(limit)
+                if lim > 0:
+                    limit_clause = f"LIMIT {lim}"
+            except (TypeError, ValueError):
+                pass
+
         query = f"""
-        SELECT
-            CONCAT('(509)', SUBSTRING(A2.AGENT_MSISDN, 4)) AS AGENT_MSISDN,
-            A2.AGENT_NAME,
-            (A1.TR_VALUE / 2)                              AS TR_VALUE,
-            A1.volume_,
-            A2.AGENT_ADRESS
-        FROM (
+        WITH AGENT AS (
+            SELECT
+                AD_ALIAS AS MSISDN,
+                AB_SALT AS AGENT_MSISDN,
+                AB_NAME AS AGENT_NAME,
+                REPLACE(AD_PERMANENTADRESS1, ',', ' ') AS AGENT_ADRESS
+            FROM (
+                SELECT
+                    AD_ALIAS,
+                    AB_SALT,
+                    AB_NAME,
+                    AD_PERMANENTADRESS1,
+                    AB_CREATED_DATE,
+                    ROW_NUMBER() OVER (
+                        PARTITION BY AD_ALIAS
+                        ORDER BY AB_CREATED_DATE DESC
+                    ) AS RN
+                FROM hive_metastore.ods_dl.ods_mfs_agent
+                WHERE {agent_snapshot_filter}
+                  AND AG_GROUP_LIST IN ('mcomagent', 'distributor')
+            ) T
+            WHERE RN = 1
+        ),
+        TRANSACTIONS AS (
             SELECT
                 DEBITPARTYIDENTIFIER AS AGENT_MSISDN,
-                SUM(ORIGINALAMOUNT)  AS TR_VALUE,
-                COUNT(DISTINCT TRANSACTIONID) AS volume_
+                SUM(ORIGINALAMOUNT) AS TR_VALUE,
+                COUNT(DISTINCT TRANSACTIONID) AS VOLUME_
             FROM hive_metastore.ods_dl.mfs_transaction_aml
-            WHERE to_date(PROCESS_DATE, 'yyyyMMdd')
-                  BETWEEN to_date('{start_str}', 'yyyy-MM-dd')
-                  AND     to_date('{end_str}',   'yyyy-MM-dd')
+            WHERE TO_DATE(PROCESS_DATE, 'yyyyMMdd')
+                  BETWEEN TO_DATE('{start_str}', 'yyyy-MM-dd')
+                  AND     TO_DATE('{end_str}',   'yyyy-MM-dd')
               AND TRANSACTIONSTATUS = 'Completed'
               AND SERVICENAME IN ('Cash In OTC', 'Agent Payment to Agent')
               AND DEBITPARTYTYPE = 'Organization'
@@ -2367,21 +2397,18 @@ class CustomerTransactionRepository:
                     'Customer cash in OTC at Master'
               )
             GROUP BY DEBITPARTYIDENTIFIER
-        ) A1
-        INNER JOIN (
-            SELECT MSISDN, AGENT_MSISDN, AGENT_NAME, AGENT_ADRESS FROM (
-                SELECT
-                    AD_ALIAS         AS MSISDN,
-                    AB_SALT          AS AGENT_MSISDN,
-                    AB_NAME          AS AGENT_NAME,
-                    REPLACE(AD_PERMANENTADRESS1, ',', ' ') AS AGENT_ADRESS,
-                    ROW_NUMBER() OVER (PARTITION BY AB_ID ORDER BY AB_CREATED_DATE DESC) AS RANK_NUMBER
-                FROM hive_metastore.ods_dl.ods_mfs_agent
-                WHERE {agent_snapshot_filter}
-                  AND AG_GROUP_LIST IN ('mcomagent', 'distributor')
-            ) WHERE RANK_NUMBER = 1
-        ) A2 ON A1.AGENT_MSISDN = A2.MSISDN
-        ORDER BY A1.TR_VALUE DESC
+        )
+        SELECT
+            CONCAT('(509)', SUBSTRING(A.AGENT_MSISDN, 4)) AS AGENT_MSISDN,
+            A.AGENT_NAME,
+            T.TR_VALUE,
+            T.VOLUME_,
+            A.AGENT_ADRESS
+        FROM TRANSACTIONS T
+        INNER JOIN AGENT A
+            ON T.AGENT_MSISDN = A.MSISDN
+        ORDER BY T.TR_VALUE DESC
+        {limit_clause}
         """
         try:
             result = self.db.execute(text(query))

@@ -335,9 +335,10 @@ class CustomerService:
         start_date: date,
         end_date: date,
         date_code: Optional[str] = None,
+        limit: Optional[int] = None,
     ) -> List[Dict[str, Any]]:
         repository = CustomerTransactionRepository(db)
-        return repository.get_agent_otc(start_date, end_date, date_code)
+        return repository.get_agent_otc(start_date, end_date, date_code, limit)
 
     @staticmethod
     def get_transaction_history(

@@ -797,45 +797,49 @@ AGENT_OTC_COLUMNS = [
     ("AGENT_MSISDN", "Agent MSISDN", lambda r: r.get("AGENT_MSISDN") or ""),
     ("AGENT_NAME",   "Agent Name",   lambda r: r.get("AGENT_NAME") or ""),
     ("TR_VALUE",     "TR Value (HTG)", lambda r: float(r.get("TR_VALUE") or 0)),
-    ("volume_",      "Volume", lambda r: int(r.get("volume_") or 0)),
+    ("VOLUME_",      "Volume", lambda r: int(r.get("VOLUME_") or r.get("volume_") or 0)),
     ("AGENT_ADRESS", "Agent Address", lambda r: r.get("AGENT_ADRESS") or ""),
 ]
 
 
-@router.get("/agent-otc", summary="Agents OTC : volume des transactions Cash In OTC / Agent Payment to Agent")
+@router.get("/agent-otc", summary="Agents OTC : top N transactions Cash In OTC / Agent Payment to Agent")
 def get_agent_otc(
     start_date: date = Query(..., description="Début de la période transactions"),
     end_date: date = Query(..., description="Fin de la période transactions"),
     date_code: Optional[str] = Query(None, description="Snapshot du profil agent (yyyyMMdd). Défaut: dernier dispo."),
+    limit: int = Query(100, ge=1, le=10000, description="Nombre max de lignes retournees pour l'affichage (top N par TR_VALUE DESC)."),
     db: Session = Depends(get_db),
 ):
     """
-    Agents OTC : SUM(ORIGINALAMOUNT)/2 par agent (DEBITPARTYIDENTIFIER) sur la période,
+    Agents OTC : SUM(ORIGINALAMOUNT) par agent (DEBITPARTYIDENTIFIER) sur la période,
     pour les services 'Cash In OTC' et 'Agent Payment to Agent'.
     Jointure sur AB_SALT (= AGENT_MSISDN dans la table agent).
+
+    Par défaut retourne le top 100 par TR_VALUE. Les endpoints /export.csv et
+    /export.xlsx renvoient toutes les lignes sans limite.
     """
-    return CustomerService.get_agent_otc(db, start_date, end_date, date_code)
+    return CustomerService.get_agent_otc(db, start_date, end_date, date_code, limit)
 
 
-@router.get("/agent-otc/export.csv", summary="Stream CSV des Agents OTC")
+@router.get("/agent-otc/export.csv", summary="Stream CSV des Agents OTC (toutes les lignes)")
 def export_agent_otc_csv(
     start_date: date = Query(...),
     end_date: date = Query(...),
     date_code: Optional[str] = Query(None),
     db: Session = Depends(get_db),
 ):
-    rows = CustomerService.get_agent_otc(db, start_date, end_date, date_code)
+    rows = CustomerService.get_agent_otc(db, start_date, end_date, date_code, limit=None)
     return stream_csv(rows, AGENT_OTC_COLUMNS, f"Agent_OTC_{start_date}_to_{end_date}.csv")
 
 
-@router.get("/agent-otc/export.xlsx", summary="Stream XLSX des Agents OTC")
+@router.get("/agent-otc/export.xlsx", summary="Stream XLSX des Agents OTC (toutes les lignes)")
 def export_agent_otc_xlsx(
     start_date: date = Query(...),
     end_date: date = Query(...),
     date_code: Optional[str] = Query(None),
     db: Session = Depends(get_db),
 ):
-    rows = CustomerService.get_agent_otc(db, start_date, end_date, date_code)
+    rows = CustomerService.get_agent_otc(db, start_date, end_date, date_code, limit=None)
     return stream_xlsx(rows, AGENT_OTC_COLUMNS, f"Agent_OTC_{start_date}_to_{end_date}.xlsx", "Agent_OTC")
 
 

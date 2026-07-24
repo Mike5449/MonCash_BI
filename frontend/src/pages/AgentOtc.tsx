@@ -76,7 +76,7 @@ export default function AgentOtc() {
     let volume = 0
     for (const r of rows) {
       total += Number(r.TR_VALUE ?? 0)
-      volume += Number(r.volume_ ?? 0)
+      volume += Number(r.VOLUME_ ?? r.volume_ ?? 0)
     }
     return { agentsCount: rows.length, totalValue: total, volume }
   }, [rows])
@@ -327,6 +327,19 @@ export default function AgentOtc() {
             }}>
               {fmtNum(filtered.length)} / {fmtNum(rows.length)}
             </span>
+            <span
+              title="Only the top 100 agents by transaction value are shown here. Use Export to download the full list."
+              style={{
+                fontSize: 'var(--fs-micro)', fontWeight: 600,
+                color: 'var(--brand)',
+                background: 'var(--brand-soft)',
+                border: '1px solid var(--brand-border)',
+                padding: '1px var(--space-2)',
+                borderRadius: 'var(--radius-xs)',
+                textTransform: 'uppercase',
+                letterSpacing: 'var(--tracking-uppercase)',
+              }}
+            >Top 100 · export for all</span>
           </div>
           {busy && rows.length === 0 ? null : (
             <div style={{
@@ -450,7 +463,7 @@ export default function AgentOtc() {
                     textAlign: 'right',
                     color: 'var(--text-secondary)', fontWeight: 500,
                   }}>
-                    {fmtNum(r.volume_)}
+                    {fmtNum(r.VOLUME_ ?? r.volume_)}
                   </td>
                   <td style={{
                     padding: 'var(--space-2) var(--space-4)',
