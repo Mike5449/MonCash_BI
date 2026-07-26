@@ -1,0 +1,1543 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MonCash BI Portal — Guide Développeur</title>
+<style>
+:root {
+  --brand: #E31B23;
+  --brand-dark: #a11117;
+  --brand-soft: #fdd2d4;
+  --bg: #ffffff;
+  --bg-subtle: #f7f9fc;
+  --bg-code: #1e293b;
+  --bg-sidebar: #f8fafc;
+  --text: #0f172a;
+  --text-soft: #475569;
+  --text-muted: #94a3b8;
+  --border: #e2e8f0;
+  --border-soft: #f1f5f9;
+  --accent-green: #16a34a;
+  --accent-amber: #d97706;
+  --accent-blue: #3b82f6;
+  --code-string: #10b981;
+  --code-keyword: #f472b6;
+  --code-comment: #94a3b8;
+  --code-cmd: #93c5fd;
+  --code-var: #fbbf24;
+  --code-py: #c084fc;
+  --shadow: 0 1px 3px rgba(15,23,42,0.06), 0 1px 2px rgba(15,23,42,0.04);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; scroll-padding-top: 80px; }
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+  font-size: 15px;
+  line-height: 1.65;
+  color: var(--text);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+}
+.wrapper {
+  display: grid;
+  grid-template-columns: 290px 1fr;
+  min-height: 100vh;
+  max-width: 1500px;
+  margin: 0 auto;
+}
+aside {
+  background: var(--bg-sidebar);
+  border-right: 1px solid var(--border);
+  padding: 24px 20px;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+}
+aside .brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-bottom: 20px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid var(--border);
+}
+aside .brand h1 {
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+  color: var(--text);
+}
+aside .brand .subtitle {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-top: 2px;
+}
+aside nav h3 {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin: 20px 0 8px 12px;
+}
+aside nav ol { list-style: none; }
+aside nav li a {
+  display: block;
+  padding: 5px 12px;
+  color: var(--text-soft);
+  text-decoration: none;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  transition: all 0.15s;
+  border-left: 2px solid transparent;
+  margin-bottom: 1px;
+}
+aside nav li a:hover {
+  background: var(--brand-soft);
+  color: var(--brand-dark);
+  border-left-color: var(--brand);
+}
+aside nav .num {
+  display: inline-block;
+  width: 22px;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  font-size: 11.5px;
+}
+main {
+  padding: 40px 60px 80px;
+  max-width: 1050px;
+  min-width: 0;
+}
+main > header {
+  padding-bottom: 32px;
+  margin-bottom: 40px;
+  border-bottom: 3px solid var(--brand);
+}
+main > header .kicker {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--brand);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+main > header h1 {
+  font-size: 34px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  color: var(--text);
+  margin-bottom: 16px;
+}
+main > header .meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+main > header .meta strong {
+  color: var(--text-soft);
+  font-weight: 600;
+}
+main > header .callout {
+  margin-top: 24px;
+  padding: 16px 20px;
+  background: var(--bg-subtle);
+  border-left: 3px solid var(--brand);
+  border-radius: 4px;
+  font-size: 14px;
+  color: var(--text-soft);
+}
+section {
+  margin-bottom: 56px;
+  scroll-margin-top: 20px;
+}
+section > h2 {
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--text);
+  margin-bottom: 8px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+}
+section > h2 .anchor {
+  color: var(--brand);
+  font-weight: 700;
+  margin-right: 8px;
+  font-variant-numeric: tabular-nums;
+}
+section h3 {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text);
+  margin: 32px 0 12px;
+  letter-spacing: -0.01em;
+}
+section h4 {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+  margin: 20px 0 8px;
+}
+section p { margin-bottom: 12px; color: var(--text-soft); }
+section ul, section ol { margin: 8px 0 16px 24px; color: var(--text-soft); }
+section li { margin-bottom: 4px; }
+section strong { color: var(--text); font-weight: 700; }
+section a { color: var(--brand); text-decoration: none; }
+section a:hover { text-decoration: underline; }
+code {
+  font-family: 'JetBrains Mono', 'SF Mono', 'Monaco', 'Consolas', monospace;
+  font-size: 13px;
+  background: var(--brand-soft);
+  color: var(--brand-dark);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: 500;
+}
+pre {
+  background: var(--bg-code);
+  color: #e2e8f0;
+  padding: 18px 20px;
+  border-radius: 8px;
+  overflow-x: auto;
+  margin: 12px 0 20px;
+  font-family: 'JetBrains Mono', 'SF Mono', 'Monaco', 'Consolas', monospace;
+  font-size: 12.5px;
+  line-height: 1.6;
+  box-shadow: var(--shadow);
+  border: 1px solid rgba(148, 163, 184, 0.15);
+}
+pre code {
+  background: none;
+  padding: 0;
+  color: inherit;
+  font-size: inherit;
+  font-weight: 400;
+}
+.cmt { color: var(--code-comment); font-style: italic; }
+.kw { color: var(--code-keyword); font-weight: 600; }
+.str { color: var(--code-string); }
+.cmd { color: var(--code-cmd); font-weight: 600; }
+.var { color: var(--code-var); }
+.py { color: var(--code-py); }
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 12px 0 20px;
+  font-size: 13.5px;
+  background: var(--bg);
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+}
+th {
+  background: var(--bg-subtle);
+  color: var(--text);
+  font-weight: 700;
+  text-align: left;
+  padding: 12px 14px;
+  border-bottom: 2px solid var(--border);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+td {
+  padding: 10px 14px;
+  border-top: 1px solid var(--border-soft);
+  color: var(--text-soft);
+  vertical-align: top;
+}
+td code { font-size: 12px; }
+tbody tr:hover { background: var(--bg-subtle); }
+.callout {
+  padding: 14px 18px;
+  border-radius: 8px;
+  margin: 16px 0;
+  font-size: 14px;
+  border-left: 3px solid;
+}
+.callout.info { background: rgba(59, 130, 246, 0.08); border-left-color: var(--accent-blue); color: var(--text-soft); }
+.callout.warn { background: rgba(217, 119, 6, 0.08); border-left-color: var(--accent-amber); color: var(--text-soft); }
+.callout.ok { background: rgba(22, 163, 74, 0.08); border-left-color: var(--accent-green); color: var(--text-soft); }
+.callout.danger { background: rgba(227, 27, 35, 0.08); border-left-color: var(--brand); color: var(--text-soft); }
+.callout strong { color: var(--text); }
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.badge.brand { background: var(--brand); color: white; }
+.badge.ok { background: var(--accent-green); color: white; }
+.badge.warn { background: var(--accent-amber); color: white; }
+.badge.info { background: var(--accent-blue); color: white; }
+.badge.soft { background: var(--bg-subtle); color: var(--text-soft); border: 1px solid var(--border); }
+pre.diagram {
+  background: var(--bg-subtle);
+  color: var(--text-soft);
+  border: 1px solid var(--border);
+  font-size: 11.5px;
+  line-height: 1.35;
+}
+.chip {
+  display: inline-block;
+  background: var(--bg-subtle);
+  border: 1px solid var(--border);
+  color: var(--text-soft);
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 500;
+  margin: 2px 4px 2px 0;
+}
+footer {
+  padding: 40px 60px;
+  border-top: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: 12px;
+  text-align: center;
+}
+@media (max-width: 900px) {
+  .wrapper { grid-template-columns: 1fr; }
+  aside { position: static; height: auto; border-right: none; border-bottom: 1px solid var(--border); }
+  main { padding: 24px; }
+  main > header h1 { font-size: 24px; }
+  section > h2 { font-size: 20px; }
+  footer { padding: 20px; }
+}
+@media print {
+  body { font-size: 11px; color: #000; background: #fff; }
+  aside { display: none; }
+  .wrapper { display: block; }
+  main { padding: 20px; max-width: 100%; }
+  pre { break-inside: avoid; box-shadow: none; border: 1px solid #ccc; background: #f4f4f4; color: #000; }
+  pre .cmt, pre .kw, pre .str, pre .cmd, pre .var, pre .py { color: #000; }
+  table { break-inside: avoid; }
+  section { break-inside: avoid-page; }
+  h2, h3 { break-after: avoid; }
+  a { color: #000; text-decoration: underline; }
+  .callout { break-inside: avoid; border: 1px solid #ccc; }
+}
+</style>
+</head>
+<body>
+<div class="wrapper">
+
+<aside>
+  <div class="brand">
+    <svg viewBox="0 0 400 320" width="36" height="36"><polygon points="60,40 60,280 320,160" fill="#E31B23"/></svg>
+    <div>
+      <h1>MonCash BI Portal</h1>
+      <div class="subtitle">Guide développeur</div>
+    </div>
+  </div>
+  <nav>
+    <h3>Sommaire</h3>
+    <ol>
+      <li><a href="#s1"><span class="num">1.</span> Vue d'ensemble</a></li>
+      <li><a href="#s2"><span class="num">2.</span> Architecture</a></li>
+      <li><a href="#s3"><span class="num">3.</span> Tech stack</a></li>
+      <li><a href="#s4"><span class="num">4.</span> Prérequis dev</a></li>
+      <li><a href="#s5"><span class="num">5.</span> Setup local</a></li>
+      <li><a href="#s6"><span class="num">6.</span> Structure du repo</a></li>
+      <li><a href="#s7"><span class="num">7.</span> Backend en détail</a></li>
+      <li><a href="#s8"><span class="num">8.</span> Frontend en détail</a></li>
+      <li><a href="#s9"><span class="num">9.</span> Design system</a></li>
+      <li><a href="#s10"><span class="num">10.</span> Modèle de données</a></li>
+      <li><a href="#s11"><span class="num">11.</span> Cookbooks</a></li>
+      <li><a href="#s12"><span class="num">12.</span> Cache &amp; performance</a></li>
+      <li><a href="#s13"><span class="num">13.</span> Auth &amp; sécurité</a></li>
+      <li><a href="#s14"><span class="num">14.</span> Debug &amp; logs</a></li>
+      <li><a href="#s15"><span class="num">15.</span> Déploiement</a></li>
+      <li><a href="#s16"><span class="num">16.</span> Conventions &amp; workflow</a></li>
+      <li><a href="#s17"><span class="num">17.</span> FAQ</a></li>
+    </ol>
+  </nav>
+</aside>
+
+<main>
+<header>
+  <div class="kicker">Onboarding développeur · v1.0</div>
+  <h1>MonCash BI Portal<br>Guide Développeur</h1>
+  <div class="meta">
+    <span><strong>Public :</strong> devs entrants sur le projet</span>
+    <span><strong>Repo :</strong> <a href="https://github.com/Mike5449/MonCash_BI">github.com/Mike5449/MonCash_BI</a></span>
+    <span><strong>Owner :</strong> Mike JEAN LOUIS</span>
+  </div>
+  <div class="callout">
+    Ce guide vous emmène de <strong>zéro</strong> à <strong>productif</strong> sur le projet en ~45 minutes. Il complète le <a href="./GUIDE_DEPLOIEMENT_IT.html">Guide de Déploiement IT</a> (qui couvre la mise en prod côté ops). Ici on parle <strong>architecture, code, patterns et cookbooks</strong>.
+  </div>
+</header>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<section id="s1">
+  <h2><span class="anchor">1.</span> Vue d'ensemble</h2>
+  <p><strong>MonCash BI Portal</strong> est un portail interne de reporting pour l'équipe métier MonCash de Digicel Haiti. Il expose sous forme de dashboards les données du data warehouse Databricks (transactions, comptes, KPIs) pour l'audit, le suivi et la conformité (BRH).</p>
+
+  <h3>1.1 Utilisateurs cibles</h3>
+  <ul>
+    <li><strong>Analystes métier MonCash</strong> — consultation quotidienne des KPIs, exports Excel</li>
+    <li><strong>Équipe conformité</strong> — Period Report (BRH), KYC compliance</li>
+    <li><strong>Direction</strong> — Snapshots WoW / MoM</li>
+    <li><strong>Auditeurs internes</strong> — recherche par MSISDN, historiques transactions</li>
+  </ul>
+
+  <h3>1.2 Fonctionnalités principales</h3>
+  <table>
+    <thead><tr><th>Domaine</th><th>Pages</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Customer</strong></td><td>Accounts, transactions, MTD/Daily stats, churn, KYC info, transaction range</td></tr>
+      <tr><td><strong>Snapshots</strong></td><td>WoW / MoM by type / bank vs wallet / department / channel</td></tr>
+      <tr><td><strong>B2B</strong></td><td>Billers + Prefunded + Merchants — accounts, transactions, monthly stats</td></tr>
+      <tr><td><strong>IMT</strong></td><td>Transactions, churn (lost receivers), department lookup</td></tr>
+      <tr><td><strong>Operations</strong></td><td>Transactions, e-money ops</td></tr>
+      <tr><td><strong>Business Tools</strong></td><td>File verification (enrich), Transaction history, Agent OTC, BRH Report, ID Card Scanner</td></tr>
+    </tbody>
+  </table>
+
+  <h3>1.3 Non-fonctionnels</h3>
+  <ul>
+    <li>Portail <strong>internal-only</strong> (VLAN Digicel, pas d'exposition Internet)</li>
+    <li>Read-only sur Databricks — jamais d'écriture SQL</li>
+    <li>Données <strong>J-1</strong> (ETL nocturne), cache 25h + flush 1 AM Haïti</li>
+    <li>HTTPS obligatoire (certificat Digicel Sub-CA)</li>
+    <li>Auth démo actuellement — sera branché sur Azure AD ou l'ASP.NET auth interne</li>
+  </ul>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<section id="s2">
+  <h2><span class="anchor">2.</span> Architecture</h2>
+
+  <h3>2.1 Vue globale</h3>
+<pre class="diagram">                             INTERNET (VLAN Digicel)
+                                     │
+                                     │  HTTPS 443 (cert Sub-CA Digicel)
+                                     ▼
+       ┌───────────────────────────────────────────────────────────────┐
+       │  Serveur Linux (ht-moncashreporting.digicelgroup.local)       │
+       │                                                               │
+       │   ┌─────────────────────────────────────────────────────┐     │
+       │   │  Docker Compose network "bi-net"                    │     │
+       │   │                                                     │     │
+       │   │   ┌───────────────────┐                             │     │
+       │   │   │  bi-frontend      │  TLS termination, /api/*    │     │
+       │   │   │  nginx 1.27       │  proxy vers backend         │     │
+       │   │   │  React/Vite bundle│                             │     │
+       │   │   └─────────┬─────────┘                             │     │
+       │   │             │ /api/* (HTTP interne)                 │     │
+       │   │             ▼                                       │     │
+       │   │   ┌───────────────────┐    ┌──────────────────┐     │     │
+       │   │   │  bi-backend       │◄──►│  bi-redis        │     │     │
+       │   │   │  FastAPI/Uvicorn  │    │  cache résultats │     │     │
+       │   │   │  Python 3.13      │    │  512 MB LRU      │     │     │
+       │   │   └─────────┬─────────┘    └──────────────────┘     │     │
+       │   │             │                                       │     │
+       │   └─────────────┼───────────────────────────────────────┘     │
+       │                 │                                             │
+       └─────────────────┼─────────────────────────────────────────────┘
+                         │
+                         │  HTTPS 443 + Azure AD token (Service Principal)
+                         ▼
+              ┌───────────────────────────────┐
+              │  Databricks SQL Warehouse     │
+              │  adb-xxxx.azuredatabricks.net │
+              │  hive_metastore.ods_dl.*      │
+              │  gr_dgc_dwh_prd.ods_dl.*      │
+              └───────────────────────────────┘</pre>
+
+  <h3>2.2 Flux d'une requête analytique</h3>
+  <ol>
+    <li>User ouvre <code>https://ht-moncashreporting.digicelgroup.local/customers/transactions</code></li>
+    <li><strong>nginx</strong> sert le bundle React (HTML+JS+CSS)</li>
+    <li>Le composant React monte, appelle un hook <code>useTransactions()</code> (React Query)</li>
+    <li>Le hook fait <code>GET /api/customers/transactions?start_date=...&amp;end_date=...</code></li>
+    <li><strong>nginx</strong> strippe <code>/api/</code> → forward vers <code>backend:8000/customers/transactions</code></li>
+    <li><strong>FastAPI</strong> vérifie CORS + Host + auth (à venir), puis appelle <code>CustomerService.get_transactions()</code></li>
+    <li>Le service appelle <code>CustomerTransactionRepository.get_transactions()</code></li>
+    <li>Le repository regarde d'abord Redis (cache), sinon exécute une SQL sur Databricks via <code>DefaultAzureCredential</code></li>
+    <li>Résultat stocké en cache Redis (TTL 25h)</li>
+    <li>JSON renvoyé au navigateur, React Query stocke en cache client, le composant re-render avec les données</li>
+  </ol>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<section id="s3">
+  <h2><span class="anchor">3.</span> Tech stack</h2>
+
+  <h3>3.1 Backend</h3>
+  <p>
+    <span class="chip">Python 3.13</span>
+    <span class="chip">FastAPI</span>
+    <span class="chip">Uvicorn</span>
+    <span class="chip">SQLAlchemy 2</span>
+    <span class="chip">Databricks SQL Connector</span>
+    <span class="chip">azure-identity (DefaultAzureCredential)</span>
+    <span class="chip">Pydantic v2 + pydantic-settings</span>
+    <span class="chip">Redis (cache)</span>
+    <span class="chip">Alembic (migrations)</span>
+    <span class="chip">slowapi (rate limiting)</span>
+    <span class="chip">openpyxl (XLSX exports)</span>
+    <span class="chip">Tesseract OCR (ID Card scanner)</span>
+  </p>
+
+  <h3>3.2 Frontend</h3>
+  <p>
+    <span class="chip">React 19</span>
+    <span class="chip">TypeScript 5 (strict)</span>
+    <span class="chip">Vite 7</span>
+    <span class="chip">React Router 7</span>
+    <span class="chip">TanStack Query 5</span>
+    <span class="chip">lucide-react (icons)</span>
+    <span class="chip">Chakra UI v3</span>
+    <span class="chip">Recharts</span>
+    <span class="chip">html2canvas + jsPDF (PDF export)</span>
+    <span class="chip">openapi-typescript-codegen (client API auto)</span>
+  </p>
+
+  <h3>3.3 Infra &amp; DevOps</h3>
+  <p>
+    <span class="chip">Docker Engine 29+</span>
+    <span class="chip">Docker Compose v2</span>
+    <span class="chip">nginx 1.27 (TLS termination)</span>
+    <span class="chip">Redis 7-alpine (cache)</span>
+    <span class="chip">Ubuntu 22.04+ (serveur)</span>
+    <span class="chip">GitHub (source de vérité)</span>
+    <span class="chip">Databricks SQL warehouse</span>
+    <span class="chip">Azure AD Service Principal</span>
+  </p>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<section id="s4">
+  <h2><span class="anchor">4.</span> Prérequis dev</h2>
+
+  <h3>4.1 Outils à installer</h3>
+  <table>
+    <thead><tr><th>Outil</th><th>Version</th><th>Installation Windows</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Git</strong></td><td>≥ 2.40</td><td><a href="https://git-scm.com/download/win">git-scm.com</a> ou <code>winget install Git.Git</code></td></tr>
+      <tr><td><strong>Python</strong></td><td>3.13 (3.11+ min)</td><td><a href="https://www.python.org/downloads/">python.org</a> ou <code>winget install Python.Python.3.13</code></td></tr>
+      <tr><td><strong>Node.js</strong></td><td>20 LTS ou 22 LTS</td><td><a href="https://nodejs.org/">nodejs.org</a> ou <code>winget install OpenJS.NodeJS.LTS</code></td></tr>
+      <tr><td><strong>VS Code</strong></td><td>latest</td><td><a href="https://code.visualstudio.com/">code.visualstudio.com</a></td></tr>
+      <tr><td><strong>Docker Desktop</strong> (optionnel)</td><td>latest</td><td>Uniquement si vous voulez lancer le stack complet en local</td></tr>
+    </tbody>
+  </table>
+
+  <h3>4.2 Extensions VS Code recommandées</h3>
+  <ul>
+    <li><strong>Python</strong> (Microsoft) — LSP, debug</li>
+    <li><strong>Pylance</strong> — type checker</li>
+    <li><strong>ES7+ React/Redux/React-Native snippets</strong> — snippets React</li>
+    <li><strong>Tailwind CSS IntelliSense</strong> — même si on n'utilise pas Tailwind, autocomplete des tokens</li>
+    <li><strong>ESLint</strong></li>
+    <li><strong>Prettier</strong></li>
+    <li><strong>GitLens</strong> — historique inline</li>
+    <li><strong>Docker</strong> — sidebar containers/images</li>
+  </ul>
+
+  <h3>4.3 Accès à demander</h3>
+  <ul>
+    <li><strong>GitHub</strong> — repo public en lecture, demander droit push si contribution</li>
+    <li><strong>Databricks workspace</strong> Digicel Haiti — permission read sur <code>gr_dgc_dwh_prd.ods_dl</code> et <code>hive_metastore.ods_dl</code></li>
+    <li><strong>Azure Service Principal</strong> — 3 credentials à mettre dans <code>backend/.env</code> (contact IT sécurité)</li>
+    <li><strong>SSH sur serveur prod</strong> <code>ht-moncashreporting</code> — pour debug prod, contact IT infra</li>
+  </ul>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<section id="s5">
+  <h2><span class="anchor">5.</span> Setup local</h2>
+
+  <h3>5.1 Cloner le repo</h3>
+<pre><span class="cmd">git</span> clone https://github.com/Mike5449/MonCash_BI.git
+<span class="cmd">cd</span> MonCash_BI</pre>
+
+  <h3>5.2 Setup backend</h3>
+<pre><span class="cmd">cd</span> backend
+
+<span class="cmt"># Creer un venv Python</span>
+<span class="cmd">python</span> -m venv venv
+venv\Scripts\activate         <span class="cmt"># Windows PowerShell</span>
+<span class="cmt"># source venv/bin/activate    # Linux/Mac</span>
+
+<span class="cmt"># Installer les deps</span>
+<span class="cmd">pip</span> install -r requirements.txt
+
+<span class="cmt"># Copier + editer le .env</span>
+<span class="cmd">copy</span> .env.example .env       <span class="cmt"># Windows</span>
+<span class="cmt"># cp .env.example .env       # Linux/Mac</span>
+<span class="cmd">notepad</span> .env               <span class="cmt"># Windows</span></pre>
+
+  <p><strong>Variables minimales à remplir</strong> dans <code>backend/.env</code> :</p>
+<pre><span class="cmt"># Databricks (demandez a l'IT ou Data Eng)</span>
+DATABRICKS_SERVER_HOSTNAME=adb-3415321098130757.17.azuredatabricks.net
+DATABRICKS_HTTP_PATH=/sql/1.0/warehouses/df8d98fb09f6a448
+
+<span class="cmt"># Azure Service Principal (demandez a l'IT securite)</span>
+AZURE_TENANT_ID=&lt;GUID&gt;
+AZURE_CLIENT_ID=&lt;GUID&gt;
+AZURE_CLIENT_SECRET=&lt;secret&gt;
+
+<span class="cmt"># JWT (generez avec : python -c "import secrets; print(secrets.token_hex(32))")</span>
+SECRET_KEY=&lt;random hex 64 chars&gt;
+REFRESH_SECRET_KEY=&lt;autre random hex 64 chars&gt;
+
+<span class="cmt"># CORS pour Vite dev server</span>
+CORS_ORIGINS=http://localhost:3000,http://localhost:5173
+
+<span class="cmt"># PAS DE ROOT_PATH ni ALLOWED_HOSTS en local (les laisser vides)</span>
+ROOT_PATH=
+ALLOWED_HOSTS=</pre>
+
+  <p><strong>Lancer le backend</strong> :</p>
+<pre><span class="cmd">uvicorn</span> main:app --reload --host 0.0.0.0 --port 8000</pre>
+  <div class="expected">
+    Vous devriez voir : <code>INFO: Application startup complete.</code> et <code>Uvicorn running on http://0.0.0.0:8000</code>.<br>
+    Testez : <a href="http://localhost:8000/docs">http://localhost:8000/docs</a> → Swagger UI.
+  </div>
+
+  <h3>5.3 Setup frontend</h3>
+<pre><span class="cmd">cd</span> ..\frontend        <span class="cmt"># retour a la racine puis dans frontend</span>
+
+<span class="cmt"># Installer les deps</span>
+<span class="cmd">npm</span> install
+
+<span class="cmt"># Lancer le dev server</span>
+<span class="cmd">npm</span> run dev</pre>
+  <div class="expected">
+    Vite affichera : <code>Local: http://localhost:5173/</code>.<br>
+    Ouvrez cette URL — vous devriez voir la page login. Entrez n'importe quel username/password (mode démo).
+  </div>
+
+  <h3>5.4 Vérifier le lien front → back</h3>
+  <p>Le <code>vite.config.ts</code> proxie <code>/api/*</code> vers <code>http://localhost:8000/</code> en dev. Ouvrez la Console DevTools (F12) → Network, cliquez sur une page analytique → vous devriez voir les requêtes <code>/api/customers/...</code> partir vers le backend local.</p>
+
+  <div class="callout warn">
+    <strong>Erreur CORS en dev ?</strong> Vérifiez que <code>CORS_ORIGINS</code> dans <code>backend/.env</code> contient bien <code>http://localhost:5173</code>. Puis relancez uvicorn.
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<section id="s6">
+  <h2><span class="anchor">6.</span> Structure du repo</h2>
+<pre class="diagram">MonCash_BI/
+├── README.md
+├── GUIDE_DEPLOIEMENT_IT.md      ← doc ops (déploiement prod)
+├── GUIDE_DEPLOIEMENT_IT.html    ← version HTML
+├── GUIDE_DEVELOPPEUR.html       ← ce document
+├── docker-compose.yml            ← stack Docker prod (3 containers)
+├── .env.example                  ← template config prod
+├── .gitignore
+│
+├── backend/                       ← FastAPI Python 3.13
+│   ├── Dockerfile                 ← Python 3.13-slim + tesseract + uvicorn
+│   ├── .dockerignore
+│   ├── requirements.txt
+│   ├── .env.example               ← template config dev
+│   ├── main.py                    ← app FastAPI + middlewares + router mount
+│   ├── database.py                ← SQLAlchemy engine + Azure auth Databricks
+│   ├── core/
+│   │   ├── config.py              ← Pydantic Settings (lit .env)
+│   │   ├── security.py            ← JWT sign/verify
+│   │   ├── cache.py               ← wrapper Redis + memory
+│   │   ├── middleware.py          ← SecurityHeaders middleware
+│   │   └── exceptions.py          ← base API exception + handler
+│   ├── models/                    ← SQLAlchemy ORM (User, RBAC)
+│   ├── dtos/                      ← Pydantic request/response schemas
+│   ├── routers/                   ← endpoints FastAPI par domaine
+│   │   ├── auth_router.py
+│   │   ├── user_router.py
+│   │   ├── customer_router.py     ← le plus gros — customers + tools
+│   │   ├── biller_router.py
+│   │   ├── merchant_router.py
+│   │   ├── prefunded_router.py
+│   │   ├── imt_router.py
+│   │   ├── operations_router.py
+│   │   ├── period_report_router.py
+│   │   ├── id_card_router.py
+│   │   ├── analytics_router.py
+│   │   └── cache_router.py        ← endpoint POST /cache/flush
+│   ├── services/                  ← logique métier (orchestre repositories)
+│   │   ├── auth_service.py
+│   │   ├── user_service.py
+│   │   ├── customer/customer_service.py
+│   │   ├── biller/biller_service.py
+│   │   └── ...
+│   ├── repositories/              ← accès données (SQL Databricks)
+│   │   ├── user_repository.py     ← SQLAlchemy ORM
+│   │   ├── customer/customer_transaction_repository.py  ← gros fichier
+│   │   ├── biller/biller_repository.py
+│   │   └── ...
+│   ├── utils/
+│   │   ├── xlsx_stream.py         ← streaming Excel
+│   │   └── csv_stream.py          ← streaming CSV
+│   ├── scripts/
+│   │   └── seed_rbac.py           ← peuple table roles/permissions au startup
+│   └── alembic/                   ← migrations schema (users + rbac uniquement)
+│
+└── frontend/                       ← React 19 + Vite + TypeScript strict
+    ├── Dockerfile                  ← Node builder → nginx runtime
+    ├── nginx.conf                  ← reverse proxy /api + HTTPS
+    ├── package.json
+    ├── tsconfig.app.json           ← strict + noUnusedLocals
+    ├── vite.config.ts              ← dev proxy /api → localhost:8000
+    ├── index.html                  ← title + favicon MonCash
+    ├── public/
+    │   ├── moncash-logo.svg        ← favicon
+    │   └── moncah-logo.png
+    └── src/
+        ├── main.tsx                ← ReactDOM.render + providers
+        ├── App.tsx                 ← routing React Router
+        ├── premium.css             ← design system tokens (CSS vars)
+        ├── pages/                  ← une page par route (~50 fichiers)
+        │   ├── Login.tsx
+        │   ├── Home.tsx
+        │   ├── BillerAccounts.tsx
+        │   ├── SnapshotDaily.tsx
+        │   ├── AgentOtc.tsx
+        │   └── ...
+        ├── components/
+        │   ├── Layout/
+        │   │   ├── DashboardLayout.tsx  ← wrapper avec sidebar
+        │   │   └── Sidebar.tsx          ← nav principale
+        │   ├── PrivateRoute.tsx         ← guard login
+        │   ├── SnapshotChrome.tsx       ← header/filter partagés snapshots
+        │   ├── ExportOverlay.tsx        ← progress export
+        │   └── ClearCacheButton.tsx
+        ├── hooks/
+        │   └── useAnalytics.ts     ← 40+ hooks React Query (un par endpoint)
+        ├── services/
+        │   └── auth.ts             ← login/logout (mode démo actuellement)
+        ├── api/                    ← auto-généré par openapi-typescript-codegen
+        │   ├── core/
+        │   │   ├── OpenAPI.ts      ← BASE URL config
+        │   │   └── request.ts
+        │   └── services/           ← une classe par tag OpenAPI
+        │       ├── AuthService.ts
+        │       ├── CustomerService.ts
+        │       ├── BillerService.ts
+        │       └── ...
+        └── utils/
+            ├── exportXlsx.ts
+            ├── pdfExport.ts        ← html2canvas + jsPDF (snapshots)
+            └── transactionHistoryPdf.ts</pre>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<section id="s7">
+  <h2><span class="anchor">7.</span> Backend en détail</h2>
+
+  <h3>7.1 Architecture en couches</h3>
+  <p>Le backend suit une architecture <strong>Router → Service → Repository → DB</strong>. Chaque couche a une responsabilité claire :</p>
+  <table>
+    <thead><tr><th>Couche</th><th>Rôle</th><th>Import <em>allowed</em></th></tr></thead>
+    <tbody>
+      <tr><td><strong>Router</strong></td><td>HTTP endpoints, validation Pydantic, orchestration réponse (JSON, CSV stream, XLSX stream)</td><td>Services</td></tr>
+      <tr><td><strong>Service</strong></td><td>Logique métier — orchestration, calculs cross-repositories</td><td>Repositories</td></tr>
+      <tr><td><strong>Repository</strong></td><td>Requêtes SQL Databricks + cache Redis, transforme <code>Row</code> → <code>dict</code></td><td>SQLAlchemy, database.py</td></tr>
+      <tr><td><strong>DB / SQL</strong></td><td>Databricks SQL Warehouse — read-only</td><td>—</td></tr>
+    </tbody>
+  </table>
+  <div class="callout warn">
+    <strong>Anti-pattern :</strong> jamais faire de SQL directement dans un router ou un service. Toujours passer par un repository. Ça garde la logique DB isolée et testable.
+  </div>
+
+  <h3>7.2 Point d'entrée <code>main.py</code></h3>
+<pre><span class="kw">from</span> fastapi <span class="kw">import</span> FastAPI
+<span class="kw">from</span> fastapi.middleware.cors <span class="kw">import</span> CORSMiddleware
+<span class="kw">from</span> fastapi.middleware.trustedhost <span class="kw">import</span> TrustedHostMiddleware
+
+<span class="kw">from</span> core.config <span class="kw">import</span> settings
+<span class="kw">from</span> routers.auth_router <span class="kw">import</span> router <span class="kw">as</span> auth_router
+<span class="kw">from</span> routers.customer_router <span class="kw">import</span> router <span class="kw">as</span> customer_router
+<span class="cmt"># ... imports des autres routers</span>
+
+app = <span class="py">FastAPI</span>(
+    title=settings.PROJECT_NAME,
+    version=<span class="str">"1.0.0"</span>,
+    root_path=settings.ROOT_PATH,      <span class="cmt"># "/api" en prod, "" en local</span>
+    openapi_tags=TAGS_METADATA,        <span class="cmt"># groupement Swagger</span>
+    lifespan=lifespan,                 <span class="cmt"># startup/shutdown hooks</span>
+)
+
+<span class="cmt"># Middlewares (ordre : premier ajoute = plus externe)</span>
+app.add_middleware(TrustedHostMiddleware, allowed_hosts=settings.allowed_hosts_list)
+app.add_middleware(CORSMiddleware, allow_origins=settings.cors_origins_list, ...)
+app.add_middleware(SecurityHeadersMiddleware)
+app.add_middleware(SlowAPIMiddleware)
+
+<span class="cmt"># Mount routers (chaque router a son propre prefix)</span>
+app.include_router(auth_router)
+app.include_router(customer_router)
+<span class="cmt"># ... autres routers</span></pre>
+
+  <h3>7.3 Configuration <code>core/config.py</code></h3>
+  <p>Utilise <strong>pydantic-settings</strong> pour lire <code>.env</code>. Toutes les vars sont typées, validées au startup.</p>
+<pre><span class="kw">from</span> pydantic_settings <span class="kw">import</span> BaseSettings
+
+<span class="kw">class</span> <span class="py">Settings</span>(BaseSettings):
+    PROJECT_NAME: <span class="py">str</span> = <span class="str">"App Base System"</span>
+
+    <span class="cmt"># Databricks (requis)</span>
+    DATABRICKS_SERVER_HOSTNAME: <span class="py">str</span>
+    DATABRICKS_HTTP_PATH: <span class="py">str</span>
+    ANALYTICS_INPUT_PATH: <span class="py">str</span>
+
+    <span class="cmt"># JWT (requis, generez avec openssl rand -hex 64)</span>
+    SECRET_KEY: <span class="py">str</span>
+    REFRESH_SECRET_KEY: <span class="py">str</span>
+    ACCESS_TOKEN_EXPIRE_MINUTES: <span class="py">int</span> = 30
+    REFRESH_TOKEN_EXPIRE_DAYS: <span class="py">int</span> = 7
+
+    <span class="cmt"># CORS + reverse proxy</span>
+    CORS_ORIGINS: <span class="py">str</span> = <span class="str">"http://localhost:3000"</span>
+    ALLOWED_HOSTS: <span class="py">str</span> = <span class="str">""</span>
+    ROOT_PATH: <span class="py">str</span> = <span class="str">""</span>
+
+    <span class="cmt"># Cache</span>
+    CACHE_ENABLED: <span class="py">bool</span> = <span class="kw">True</span>
+    CACHE_DEFAULT_TTL: <span class="py">int</span> = 90000    <span class="cmt"># 25h</span>
+    CACHE_BACKEND: <span class="py">str</span> = <span class="str">"memory"</span>    <span class="cmt"># ou "redis"</span>
+    REDIS_URL: <span class="py">str</span> = <span class="str">"redis://localhost:6379/0"</span>
+
+    <span class="kw">class</span> Config:
+        env_file = <span class="str">".env"</span>
+        extra = <span class="str">"ignore"</span>
+
+settings = <span class="py">Settings</span>()</pre>
+
+  <h3>7.4 Auth Databricks <code>database.py</code></h3>
+  <p>Utilise <code>DefaultAzureCredential</code> (SDK <code>azure-identity</code>) qui tente automatiquement plusieurs sources :</p>
+  <ol>
+    <li>Env vars <code>AZURE_TENANT_ID</code>/<code>AZURE_CLIENT_ID</code>/<code>AZURE_CLIENT_SECRET</code> — le mode utilisé en prod (Service Principal)</li>
+    <li>Managed Identity — si l'app tournait sur Azure VM</li>
+    <li>Azure CLI — si <code>az login</code> a été fait localement</li>
+    <li>Interactive browser fallback</li>
+  </ol>
+  <p>Le token acquis est valide ~1 heure et est <strong>caché en RAM</strong> avec renewal 5 min avant expiration (thread-safe grâce à un <code>threading.Lock</code>).</p>
+  <p>L'engine SQLAlchemy utilise un <code>creator</code> custom qui appelle <code>databricks.sql.connect(..., access_token=token)</code> pour chaque connexion pool.</p>
+
+  <h3>7.5 Router pattern</h3>
+<pre><span class="kw">from</span> fastapi <span class="kw">import</span> APIRouter, Depends, Query
+<span class="kw">from</span> sqlalchemy.orm <span class="kw">import</span> Session
+<span class="kw">from</span> database <span class="kw">import</span> get_db
+<span class="kw">from</span> services.biller.biller_service <span class="kw">import</span> BillerService
+
+router = <span class="py">APIRouter</span>(prefix=<span class="str">"/billers"</span>, tags=[<span class="str">"billers"</span>])
+
+<span class="var">@router.get</span>(<span class="str">"/accounts"</span>, summary=<span class="str">"Liste des billers"</span>)
+<span class="kw">def</span> get_biller_accounts(
+    limit: <span class="py">int</span> = <span class="py">Query</span>(100),
+    start_date: <span class="py">Optional</span>[<span class="py">str</span>] = <span class="py">Query</span>(<span class="kw">None</span>, description=<span class="str">"yyyyMMdd"</span>),
+    end_date: <span class="py">Optional</span>[<span class="py">str</span>] = <span class="py">Query</span>(<span class="kw">None</span>, description=<span class="str">"yyyyMMdd"</span>),
+    db: Session = <span class="py">Depends</span>(get_db),
+):
+    <span class="kw">return</span> BillerService.get_accounts(db, limit, start_date, end_date)</pre>
+
+  <h3>7.6 Service pattern</h3>
+<pre><span class="kw">class</span> <span class="py">BillerService</span>:
+    <span class="var">@staticmethod</span>
+    <span class="kw">def</span> get_accounts(db: Session, limit: <span class="py">int</span>, start_date, end_date) -> <span class="py">List</span>[<span class="py">Dict</span>]:
+        repository = <span class="py">BillerRepository</span>(db)
+        <span class="kw">return</span> repository.get_biller_accounts(limit, start_date, end_date)</pre>
+  <div class="callout info">
+    Beaucoup de services sont "pass-through" (juste un wrapper autour du repository). C'est OK — la couche existe pour permettre la logique métier future (calculs cross-repositories, transformations complexes).
+  </div>
+
+  <h3>7.7 Repository pattern</h3>
+<pre><span class="kw">from</span> sqlalchemy <span class="kw">import</span> text
+<span class="kw">import</span> re
+
+_YYYYMMDD = re.<span class="py">compile</span>(<span class="str">r"^\d{8}$"</span>)
+
+<span class="kw">class</span> <span class="py">BillerRepository</span>:
+    <span class="kw">def</span> __init__(<span class="kw">self</span>, db):
+        <span class="kw">self</span>.db = db
+
+    <span class="kw">def</span> get_biller_accounts(<span class="kw">self</span>, limit=100, start_date=<span class="kw">None</span>, end_date=<span class="kw">None</span>):
+        <span class="cmt"># Anti-injection : valider les entrees</span>
+        <span class="kw">for</span> d <span class="kw">in</span> (start_date, end_date):
+            <span class="kw">if</span> d <span class="kw">and</span> <span class="kw">not</span> _YYYYMMDD.<span class="py">match</span>(d):
+                <span class="kw">raise</span> <span class="py">ValueError</span>(<span class="str">f"Invalid date format {d}"</span>)
+
+        <span class="cmt"># Construction du WHERE dynamique selon les filtres</span>
+        date_clause = <span class="str">f"AND to_date(DATE_CODE, 'yyyyMMdd') BETWEEN to_date('{start_date}', 'yyyyMMdd')"</span> \
+                      <span class="kw">if</span> start_date <span class="kw">and</span> end_date <span class="kw">else</span> <span class="str">"AND to_date(...) = latest"</span>
+
+        query = <span class="str">f"""
+        SELECT DISTINCT
+            DATE_CODE,
+            IDENTITYMSISDN AS ACCOUNT_ID,
+            IDENTITYNAME AS BILLER_NAME,
+            ...
+        FROM gr_dgc_dwh_prd.ods_dl.mfs_mobile_banking_audit
+        WHERE PRODUCTS LIKE '%[Utility Product]%'
+          {date_clause}
+        LIMIT {limit}
+        """</span>
+        result = <span class="kw">self</span>.db.execute(<span class="py">text</span>(query))
+        <span class="kw">return</span> [<span class="py">dict</span>(row) <span class="kw">for</span> row <span class="kw">in</span> result.mappings()]</pre>
+  <div class="callout danger">
+    <strong>SQL injection :</strong> jamais concatener directement une string user dans une SQL sans validation. Utilisez soit :
+    <ul>
+      <li><strong>Bound params</strong> SQLAlchemy : <code>text("SELECT * WHERE x = :x").bindparams(x=user_input)</code> — préféré</li>
+      <li><strong>Validation stricte</strong> avant f-string : regex, whitelist, cast <code>int()</code></li>
+    </ul>
+    Les entrées de type <code>date</code>/<code>int</code> passées via FastAPI Query sont déjà castées, mais les strings restent à valider.
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<section id="s8">
+  <h2><span class="anchor">8.</span> Frontend en détail</h2>
+
+  <h3>8.1 Point d'entrée <code>main.tsx</code> &amp; <code>App.tsx</code></h3>
+  <p><code>main.tsx</code> monte React dans <code>#root</code> avec les providers (QueryClient, Router, Chakra). <code>App.tsx</code> déclare toutes les routes.</p>
+<pre><span class="cmt">// App.tsx — extrait</span>
+<span class="kw">import</span> { BrowserRouter, Routes, Route } <span class="kw">from</span> <span class="str">"react-router-dom"</span>
+
+<span class="kw">export default function</span> App() {
+  <span class="kw">return</span> (
+    &lt;BrowserRouter&gt;
+      &lt;Routes&gt;
+        &lt;Route path=<span class="str">"/login"</span> element={&lt;Login /&gt;} /&gt;
+        &lt;Route path=<span class="str">"/"</span> element={&lt;PrivateRoute&gt;&lt;Home /&gt;&lt;/PrivateRoute&gt;} /&gt;
+        &lt;Route path=<span class="str">"/customers/transactions"</span> element={&lt;PrivateRoute&gt;&lt;Transactions /&gt;&lt;/PrivateRoute&gt;} /&gt;
+        {<span class="cmt">/* ... ~60 routes */</span>}
+      &lt;/Routes&gt;
+    &lt;/BrowserRouter&gt;
+  )
+}</pre>
+
+  <h3>8.2 Client API auto-généré</h3>
+  <p>Le dossier <code>src/api/</code> est <strong>auto-généré</strong> par <code>openapi-typescript-codegen</code> à partir du schéma OpenAPI du backend. Chaque tag FastAPI (auth, customers, billers…) devient une classe TypeScript avec des méthodes statiques.</p>
+<pre><span class="cmt">// Exemple : src/api/services/BillerService.ts</span>
+<span class="kw">export class</span> BillerService {
+    <span class="kw">public static</span> getAccounts(
+        limit: <span class="py">number</span> = 100,
+        startDate?: <span class="py">string</span>,
+        endDate?: <span class="py">string</span>,
+    ): CancelablePromise&lt;Array&lt;<span class="py">any</span>&gt;&gt; {
+        <span class="kw">return</span> __request(OpenAPI, {
+            method: <span class="str">'GET'</span>,
+            url: <span class="str">'/billers/accounts'</span>,
+            query: { limit, <span class="str">'start_date'</span>: startDate, <span class="str">'end_date'</span>: endDate },
+        })
+    }
+}</pre>
+  <div class="callout warn">
+    <strong>Régénération du client</strong> : quand vous modifiez un endpoint backend, il faut regénérer les types côté frontend. Actuellement fait à la main — voir Cookbook §11.3. Un jour on scriptera ça.
+  </div>
+
+  <h3>8.3 Hooks React Query — <code>hooks/useAnalytics.ts</code></h3>
+  <p>Un <strong>gros fichier</strong> qui contient tous les hooks (~40) — un hook par endpoint. Pattern :</p>
+<pre><span class="cmt">// Extrait de useAnalytics.ts</span>
+<span class="kw">export const</span> useBillerAccounts = (options: {
+  limit?: <span class="py">number</span>,
+  startDate?: <span class="py">string</span>,
+  endDate?: <span class="py">string</span>,
+} = {}) =&gt; {
+  <span class="kw">return</span> <span class="py">useQuery</span>({
+    queryKey: [<span class="str">"biller-accounts"</span>, options],       <span class="cmt">// cache key</span>
+    queryFn: () =&gt; BillerService.getAccounts(
+      options.limit || 100,
+      options.startDate,
+      options.endDate,
+    ),
+  })
+}</pre>
+  <p><strong>Pourquoi React Query</strong> :</p>
+  <ul>
+    <li>Cache client automatique avec dedup — 2 composants qui appellent le même hook = 1 seul HTTP call</li>
+    <li>Refetch au focus, retry auto en cas d'erreur</li>
+    <li>Loading/error states out-of-the-box (<code>isLoading</code>, <code>isFetching</code>, <code>error</code>)</li>
+    <li><code>refetch()</code> disponible pour refresh manuel</li>
+  </ul>
+
+  <h3>8.4 Layout &amp; Sidebar</h3>
+  <p><code>components/Layout/DashboardLayout.tsx</code> — wrapper commun à toutes les pages logged-in avec sidebar à gauche et zone de contenu à droite.</p>
+  <p><code>components/Layout/Sidebar.tsx</code> — nav principale avec :</p>
+  <ul>
+    <li>Logo + titre</li>
+    <li>Barre de recherche (filtre les items par label)</li>
+    <li>Groupes : Main / Core Analytics / Business Tools</li>
+    <li>Dropdowns groupés (Customer, Snapshots, B2B, IMT, Operation)</li>
+    <li>Profil utilisateur + bouton logout en bas</li>
+  </ul>
+  <p>Chaque item de menu est déclaré dans un tableau <code>allItems</code> (pour la recherche) + rendu manuellement dans le JSX. Voir Cookbook §11.4 pour ajouter un item.</p>
+
+  <h3>8.5 Composant page-type</h3>
+  <p>Exemple simplifié : une page qui affiche une table de données avec loading state.</p>
+<pre><span class="kw">import</span> { DashboardLayout } <span class="kw">from</span> <span class="str">"../components/Layout/DashboardLayout"</span>
+<span class="kw">import</span> { useBillerAccounts } <span class="kw">from</span> <span class="str">"../hooks/useAnalytics"</span>
+
+<span class="kw">export default function</span> BillerAccounts() {
+  <span class="kw">const</span> [search, setSearch] = <span class="py">useState</span>(<span class="str">""</span>)
+  <span class="kw">const</span> { data: accounts, isLoading, refetch } = <span class="py">useBillerAccounts</span>({ limit: 100 })
+
+  <span class="kw">const</span> filtered = <span class="py">useMemo</span>(() =&gt; {
+    <span class="kw">const</span> q = search.trim().toLowerCase()
+    <span class="kw">if</span> (!q) <span class="kw">return</span> accounts ?? []
+    <span class="kw">return</span> (accounts ?? []).filter(a =&gt; a.NAME.toLowerCase().includes(q))
+  }, [accounts, search])
+
+  <span class="kw">return</span> (
+    &lt;DashboardLayout&gt;
+      &lt;h1&gt;Billers&lt;/h1&gt;
+      &lt;input value={search} onChange={e =&gt; setSearch(e.target.value)} /&gt;
+      &lt;table&gt;
+        {isLoading ? <span class="str">"Loading..."</span> : filtered.map(a =&gt; &lt;tr&gt;...&lt;/tr&gt;)}
+      &lt;/table&gt;
+    &lt;/DashboardLayout&gt;
+  )
+}</pre>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<section id="s9">
+  <h2><span class="anchor">9.</span> Design system</h2>
+
+  <h3>9.1 Tokens CSS — <code>src/premium.css</code></h3>
+  <p>Tout est basé sur des <strong>CSS custom properties</strong> exposées à la racine. <strong>N'utilisez jamais</strong> de couleurs / tailles / spacings hardcodés — utilisez toujours les tokens.</p>
+
+  <h4>Couleurs</h4>
+  <table>
+    <thead><tr><th>Token</th><th>Valeur</th><th>Usage</th></tr></thead>
+    <tbody>
+      <tr><td><code>--brand</code></td><td>#E31B23</td><td>Rouge Digicel — accent principal, actions primaires</td></tr>
+      <tr><td><code>--brand-soft</code></td><td>#fef2f2</td><td>Fond léger rouge (badges, alertes)</td></tr>
+      <tr><td><code>--surface-canvas</code></td><td>#fafbfc</td><td>Fond de page</td></tr>
+      <tr><td><code>--surface-card</code></td><td>#ffffff</td><td>Fond des cards / tables</td></tr>
+      <tr><td><code>--surface-muted</code></td><td>#f5f6f8</td><td>Fond inset, rangs alternés</td></tr>
+      <tr><td><code>--border-faint / default / strong</code></td><td>rgba slate</td><td>Bordures graduées</td></tr>
+      <tr><td><code>--text-primary / secondary / tertiary / muted</code></td><td>Ink → gris</td><td>Hiérarchie 4 niveaux</td></tr>
+      <tr><td><code>--positive / negative</code></td><td>Vert / Rouge</td><td>Signaux (up/down, positif/négatif)</td></tr>
+      <tr><td><code>--positive-soft / negative-soft</code></td><td>Pâle</td><td>Fond des badges positif/négatif</td></tr>
+      <tr><td><code>--data-subs / volume / value / revenue</code></td><td>Bleu / teal / vert / rouge</td><td>Accents charts uniquement</td></tr>
+    </tbody>
+  </table>
+
+  <h4>Spacing (base 4px)</h4>
+  <p>
+    <span class="chip"><code>--space-1</code> = 4px</span>
+    <span class="chip"><code>--space-2</code> = 8px</span>
+    <span class="chip"><code>--space-3</code> = 12px</span>
+    <span class="chip"><code>--space-4</code> = 16px</span>
+    <span class="chip"><code>--space-6</code> = 24px</span>
+    <span class="chip"><code>--space-8</code> = 32px</span>
+    <span class="chip"><code>--space-10</code> = 40px</span>
+    <span class="chip"><code>--space-12</code> = 48px</span>
+    <span class="chip"><code>--space-16</code> = 64px</span>
+  </p>
+
+  <h4>Font sizes</h4>
+  <table>
+    <thead><tr><th>Token</th><th>Taille</th><th>Usage typique</th></tr></thead>
+    <tbody>
+      <tr><td><code>--fs-micro</code></td><td>10px</td><td>Kickers uppercase, labels de colonnes</td></tr>
+      <tr><td><code>--fs-label</code></td><td>11px</td><td>Labels en case normale</td></tr>
+      <tr><td><code>--fs-body</code></td><td>13px</td><td>Texte body (défaut)</td></tr>
+      <tr><td><code>--fs-md</code></td><td>14px</td><td>Card titles, emphasized body</td></tr>
+      <tr><td><code>--fs-lg</code></td><td>16px</td><td>Section headings</td></tr>
+      <tr><td><code>--fs-xl</code></td><td>22px</td><td>Page titles</td></tr>
+      <tr><td><code>--fs-data</code></td><td>26px</td><td>KPI hero numbers</td></tr>
+    </tbody>
+  </table>
+
+  <h4>Autres</h4>
+  <p>
+    <span class="chip"><code>--radius-xs</code> = 2px</span>
+    <span class="chip"><code>--radius-sm</code> = 3px</span>
+    <span class="chip"><code>--radius-md</code> = 4px</span>
+    <span class="chip"><code>--radius-pill</code> = 999px</span>
+    <span class="chip"><code>--tracking-uppercase</code> = 0.08em</span>
+    <span class="chip"><code>--tracking-tight</code> = -0.015em</span>
+  </p>
+
+  <h3>9.2 Patterns visuels standard</h3>
+  <p><strong>Page header</strong> avec kicker + tight title + subtitle :</p>
+<pre>&lt;div style={{ fontSize: <span class="str">'var(--fs-micro)'</span>, color: <span class="str">'var(--text-tertiary)'</span>,
+              textTransform: <span class="str">'uppercase'</span>, letterSpacing: <span class="str">'var(--tracking-uppercase)'</span> }}&gt;
+  Snapshot · By TR_TYPE
+&lt;/div&gt;
+&lt;h1 style={{ fontSize: <span class="str">'var(--fs-xl)'</span>, fontWeight: 600,
+             letterSpacing: <span class="str">'var(--tracking-tight)'</span> }}&gt;
+  MonCash KPIs Snapshot
+&lt;/h1&gt;
+&lt;p style={{ fontSize: <span class="str">'var(--fs-body)'</span>, color: <span class="str">'var(--text-secondary)'</span> }}&gt;
+  Description...
+&lt;/p&gt;</pre>
+
+  <div class="callout warn">
+    <strong>Anti-pattern à éviter</strong> :
+    <ul>
+      <li>Hex hardcodés (<code>#0f172a</code>, <code>#94a3b8</code>) — utilisez les tokens</li>
+      <li><code>fontWeight: 800</code> ou plus — trop "shouty", tenez-vous à 500-600 (600 max pour titles)</li>
+      <li><code>borderRadius: 16px</code> — trop rond, utilisez <code>--radius-md</code> (4px)</li>
+      <li>Badges colorés partout — l'esthétique du système est "ledger/newspaper", restraint</li>
+    </ul>
+  </div>
+
+  <h3>9.3 Pages de référence à imiter</h3>
+  <ul>
+    <li><strong>BillerTransactions.tsx</strong> — le modèle canonique avec KPI cards + filtres + table + export</li>
+    <li><strong>BillerAccounts.tsx</strong> / <strong>PrefundedAccounts.tsx</strong> — pattern liste + recherche + période</li>
+    <li><strong>SnapshotDaily.tsx</strong> + <strong>SnapshotChrome.tsx</strong> — grid comparaison + composants partagés</li>
+  </ul>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<section id="s10">
+  <h2><span class="anchor">10.</span> Modèle de données</h2>
+
+  <h3>10.1 Tables Databricks principales</h3>
+  <table>
+    <thead><tr><th>Table</th><th>Contenu</th><th>Utilisée par</th></tr></thead>
+    <tbody>
+      <tr><td><code>hive_metastore.ods_dl.mfs_transaction_aml</code></td><td>Toutes les transactions MonCash (~millions/mois)</td><td>Tout ce qui est transactions, snapshots, agent OTC, IMT</td></tr>
+      <tr><td><code>gr_dgc_dwh_prd.ods_dl.mfs_mobile_banking_audit</code></td><td>Snapshot audit journalier des comptes MFS (customers, billers, prefunded, merchants)</td><td>Pages Accounts (billers, prefunded, merchants), Customer accounts</td></tr>
+      <tr><td><code>hive_metastore.ods_dl.ods_mfs_agent</code></td><td>Profils agents (nom, adresse, MSISDN)</td><td>Agent OTC, jointures pour enrichir</td></tr>
+    </tbody>
+  </table>
+
+  <h3>10.2 Convention de partitionnement</h3>
+  <p>Presque toutes les tables sont partitionnées par <code>DATE_CODE</code> (format <code>yyyyMMdd</code>, string). <strong>Toujours filtrer sur DATE_CODE</strong> pour éviter de scanner l'historique complet (coût énorme).</p>
+  <p>Exemple :</p>
+<pre><span class="cmt">-- BON : filtre partition en amont</span>
+<span class="kw">SELECT</span> ... <span class="kw">FROM</span> mfs_transaction_aml
+<span class="kw">WHERE</span> DATE_CODE <span class="kw">BETWEEN</span> <span class="str">'20260701'</span> <span class="kw">AND</span> <span class="str">'20260731'</span>
+
+<span class="cmt">-- MAUVAIS : scan tout l'historique</span>
+<span class="kw">SELECT</span> ... <span class="kw">FROM</span> mfs_transaction_aml
+<span class="kw">WHERE</span> DEBITPARTYIDENTIFIER = <span class="str">'50937XXXXXXX'</span></pre>
+
+  <h3>10.3 Colonnes clés dans <code>mfs_transaction_aml</code></h3>
+  <table>
+    <thead><tr><th>Colonne</th><th>Description</th></tr></thead>
+    <tbody>
+      <tr><td><code>TRANSACTIONID</code></td><td>Identifiant unique de la transaction</td></tr>
+      <tr><td><code>DATE_CODE</code></td><td>Date snapshot (yyyyMMdd) — partition</td></tr>
+      <tr><td><code>PROCESS_DATE</code></td><td>Date effective transaction (yyyyMMdd)</td></tr>
+      <tr><td><code>SERVICENAME</code></td><td>"Cash In OTC", "P2P", "Bill Payment", etc.</td></tr>
+      <tr><td><code>REASONTYPE</code></td><td>Description fine du type de transaction</td></tr>
+      <tr><td><code>TRANSACTIONSTATUS</code></td><td>"Completed", "Failed", "Pending", etc.</td></tr>
+      <tr><td><code>DEBITPARTYIDENTIFIER</code> / <code>DEBITPARTYTYPE</code></td><td>Qui paie (MSISDN ou org)</td></tr>
+      <tr><td><code>CREDITPARTYIDENTIFIER</code> / <code>CREDITPARTYTYPE</code></td><td>Qui reçoit</td></tr>
+      <tr><td><code>ORIGINALAMOUNT</code></td><td>Montant HTG</td></tr>
+      <tr><td><code>CHARGEAMOUNT</code></td><td>Commission MFS</td></tr>
+      <tr><td><code>CHANNEL</code></td><td>USSD_Digicel, App, API, QR, Web</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<section id="s11">
+  <h2><span class="anchor">11.</span> Cookbooks — tâches courantes</h2>
+
+  <h3>11.1 Ajouter un nouvel endpoint analytique complet</h3>
+  <p>Cas d'usage : votre PM demande "je veux voir le total des cash-outs par département sur une période". Étapes :</p>
+
+  <h4>1) Écrire &amp; tester la SQL sur Databricks directement</h4>
+  <p>Ouvrez le SQL Editor Databricks, itérez jusqu'à obtenir la bonne SQL, notez les colonnes de sortie.</p>
+
+  <h4>2) Créer la méthode dans un repository</h4>
+<pre><span class="cmt"># backend/repositories/customer/customer_transaction_repository.py</span>
+<span class="kw">def</span> get_cashout_by_department(<span class="kw">self</span>, start_date: <span class="py">str</span>, end_date: <span class="py">str</span>):
+    <span class="kw">for</span> d <span class="kw">in</span> (start_date, end_date):
+        <span class="kw">if</span> <span class="kw">not</span> _YYYYMMDD.<span class="py">match</span>(d):
+            <span class="kw">raise</span> <span class="py">ValueError</span>(<span class="str">"invalid date"</span>)
+    query = <span class="str">f"""
+    SELECT DEPARTMENT, SUM(ORIGINALAMOUNT) AS TOTAL_VALUE, COUNT(*) AS VOLUME
+    FROM hive_metastore.ods_dl.mfs_transaction_aml
+    WHERE DATE_CODE BETWEEN '{start_date}' AND '{end_date}'
+      AND SERVICENAME = 'Cash Out'
+      AND TRANSACTIONSTATUS = 'Completed'
+    GROUP BY DEPARTMENT
+    ORDER BY TOTAL_VALUE DESC
+    """</span>
+    result = <span class="kw">self</span>.db.execute(<span class="py">text</span>(query))
+    <span class="kw">return</span> [<span class="py">dict</span>(row) <span class="kw">for</span> row <span class="kw">in</span> result.mappings()]</pre>
+
+  <h4>3) Ajouter la méthode service (pass-through souvent)</h4>
+<pre><span class="cmt"># backend/services/customer/customer_service.py</span>
+<span class="var">@staticmethod</span>
+<span class="kw">def</span> get_cashout_by_department(db, start_date, end_date):
+    <span class="kw">return</span> <span class="py">CustomerTransactionRepository</span>(db).get_cashout_by_department(start_date, end_date)</pre>
+
+  <h4>4) Exposer l'endpoint dans le router</h4>
+<pre><span class="cmt"># backend/routers/customer_router.py</span>
+<span class="var">@router.get</span>(<span class="str">"/cashout-by-department"</span>, summary=<span class="str">"Cash-out totals grouped by department"</span>)
+<span class="kw">def</span> get_cashout_by_department(
+    start_date: <span class="py">str</span> = <span class="py">Query</span>(..., description=<span class="str">"yyyyMMdd"</span>),
+    end_date: <span class="py">str</span> = <span class="py">Query</span>(..., description=<span class="str">"yyyyMMdd"</span>),
+    db: Session = <span class="py">Depends</span>(get_db),
+):
+    <span class="kw">return</span> CustomerService.get_cashout_by_department(db, start_date, end_date)</pre>
+
+  <h4>5) Test rapide dans Swagger</h4>
+  <p>Relancez uvicorn, ouvrez <a href="http://localhost:8000/docs">http://localhost:8000/docs</a>, cliquez sur le nouvel endpoint, "Try it out", vérifiez la réponse.</p>
+
+  <h4>6) Ajouter le hook React</h4>
+<pre><span class="cmt">// frontend/src/hooks/useAnalytics.ts — a la fin</span>
+<span class="kw">export const</span> useCashoutByDepartment = (options: { startDate?: <span class="py">string</span>, endDate?: <span class="py">string</span> } = {}) =&gt; {
+  <span class="kw">return</span> <span class="py">useQuery</span>({
+    queryKey: [<span class="str">"cashout-by-department"</span>, options],
+    enabled: !!options.startDate &amp;&amp; !!options.endDate,
+    queryFn: () =&gt; <span class="py">fetch</span>(
+      <span class="str">`/api/customers/cashout-by-department?start_date=</span>${<span class="str">options.startDate</span>}<span class="str">&amp;end_date=</span>${<span class="str">options.endDate</span>}<span class="str">`</span>
+    ).<span class="py">then</span>(r =&gt; r.<span class="py">json</span>()),
+  })
+}</pre>
+  <div class="callout info">
+    Pour utiliser le client auto-généré (préféré), régénérez d'abord : voir §11.3.
+  </div>
+
+  <h4>7) Créer la page React</h4>
+  <p>Copiez une page existante similaire (ex: <code>BillerAccounts.tsx</code>), renommez, ajustez les colonnes et le hook. Voir §11.2 pour l'entrée sidebar.</p>
+
+  <h3>11.2 Ajouter une page React qui n'existe pas encore</h3>
+  <ol>
+    <li>Créez <code>src/pages/MaNouvellePage.tsx</code></li>
+    <li>Dans <code>App.tsx</code>, importez : <code>import MaNouvellePage from "./pages/MaNouvellePage"</code></li>
+    <li>Ajoutez la route : <code>&lt;Route path="/ma-page" element={&lt;PrivateRoute&gt;&lt;MaNouvellePage /&gt;&lt;/PrivateRoute&gt;} /&gt;</code></li>
+    <li>Voir §11.4 pour l'ajout dans le sidebar</li>
+  </ol>
+
+  <h3>11.3 Régénérer le client API auto-généré</h3>
+<pre><span class="cmt"># 1. Backend doit tourner en local pour exposer /openapi.json</span>
+<span class="cmd">cd</span> backend
+<span class="cmd">uvicorn</span> main:app --port 8000 &amp;
+
+<span class="cmt"># 2. Depuis frontend, regenerer</span>
+<span class="cmd">cd</span> ..\frontend
+<span class="cmd">npx</span> openapi-typescript-codegen --input http://localhost:8000/openapi.json --output ./src/api --client fetch
+
+<span class="cmt"># 3. Le dossier src/api/ est reecrit. Committez.</span>
+<span class="cmd">git</span> add src/api
+<span class="cmd">git</span> commit -m <span class="str">"chore(api): regen client"</span></pre>
+
+  <h3>11.4 Ajouter un item dans le sidebar</h3>
+  <p>Ouvrez <code>src/components/Layout/Sidebar.tsx</code>. Modifications :</p>
+  <ol>
+    <li>Ajouter le nouvel item dans le tableau <code>allItems</code> (pour la recherche) :
+      <pre>{ label: <span class="str">"Tools · Ma nouvelle page"</span>, to: <span class="str">"/ma-page"</span>, group: <span class="str">"Tools"</span> },</pre>
+    </li>
+    <li>Rendre l'item dans la section correspondante (dans le return du composant) :
+      <pre>&lt;NavItem to=<span class="str">"/ma-page"</span> icon={FileBarChart} active={location.pathname === <span class="str">"/ma-page"</span>}&gt;
+  Ma nouvelle page
+&lt;/NavItem&gt;</pre>
+    </li>
+  </ol>
+
+  <h3>11.5 Modifier le design d'un composant existant</h3>
+  <ol>
+    <li>Toujours partir des <strong>tokens</strong> (§9)</li>
+    <li>Pour les Cell, ColumnHeader, cards KPI etc. — imiter le pattern des pages "premium" refactorisées (BillerTransactions, snapshots)</li>
+    <li>Vérifier <code>npm run build</code> passe (tsc strict + Vite bundle)</li>
+    <li>Test visuel dans le navigateur : Ctrl+F5 pour bypass cache</li>
+  </ol>
+
+  <h3>11.6 Rebuild + redéployer sur le serveur</h3>
+<pre><span class="cmt"># En SSH sur ht-moncashreporting</span>
+<span class="cmd">cd</span> /opt/moncash-portal
+<span class="cmd">git</span> pull origin main
+
+<span class="cmt"># Si backend ou frontend a change :</span>
+<span class="cmd">docker</span> compose build         <span class="cmt"># build les images qui ont change</span>
+<span class="cmd">docker</span> compose up -d         <span class="cmt"># recree les containers concernes</span>
+
+<span class="cmt"># Verifier</span>
+<span class="cmd">docker</span> compose ps
+<span class="cmd">docker</span> compose logs --tail=30 backend | <span class="cmd">grep</span> -E <span class="str">"startup|ERROR"</span></pre>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<section id="s12">
+  <h2><span class="anchor">12.</span> Cache &amp; performance</h2>
+
+  <h3>12.1 Deux niveaux de cache</h3>
+  <table>
+    <thead><tr><th>Niveau</th><th>Où</th><th>TTL</th><th>Invalidation</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Server (Redis)</strong></td><td>Container <code>bi-redis</code></td><td>25h</td><td>Flush automatique 1 AM Haïti + bouton "Clear cache" UI</td></tr>
+      <tr><td><strong>Client (React Query)</strong></td><td>Mémoire navigateur</td><td>Session (Ctrl+F5 pour reset)</td><td>Auto-refetch on window focus (défaut)</td></tr>
+    </tbody>
+  </table>
+
+  <h3>12.2 Comment le cache Redis est utilisé backend-side</h3>
+  <p>Voir <code>backend/core/cache.py</code>. Le pattern : chaque appel repository check Redis d'abord, sinon exécute la SQL et met en cache.</p>
+  <p>La <strong>clé de cache</strong> est dérivée du nom de fonction + hash des arguments. Deux appels avec les mêmes args → 1 seule requête SQL.</p>
+
+  <h3>12.3 Bypass cache pour debug</h3>
+  <p>Dans l'UI, cliquez le bouton "Clear cache" (icône ⟲ dans le sidebar). Ou en curl :</p>
+<pre><span class="cmd">curl</span> -X POST https://ht-moncashreporting.digicelgroup.local/api/cache/flush</pre>
+
+  <h3>12.4 Pourquoi on fait ça (contexte business)</h3>
+  <p>Databricks SQL warehouse a un <strong>coût par requête</strong> et un <strong>auto-suspend</strong> après ~10 min sans activité (cold start ~15-30s au réveil). Le cache 25h :</p>
+  <ul>
+    <li>Divise le coût par ~1440 (une exécution par jour vs par requête)</li>
+    <li>Réponse < 100ms au lieu de 2-30s</li>
+    <li>Compatible avec le modèle J-1 (données pas modifiées intra-journée)</li>
+  </ul>
+
+  <h3>12.5 Charts / pages lourdes</h3>
+  <p>Les pages avec charts (Snapshots, Home) peuvent utiliser <strong>lazy loading</strong> via <code>React.lazy()</code> + <code>Suspense</code>. Pas encore appliqué partout — opportunité d'optimisation.</p>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<section id="s13">
+  <h2><span class="anchor">13.</span> Auth &amp; sécurité</h2>
+
+  <h3>13.1 État actuel — Mode démo</h3>
+  <div class="callout warn">
+    Actuellement <code>frontend/src/services/auth.ts</code> accepte <strong>n'importe quel username/password</strong> non vide. Aucune vérification serveur. Session en <code>localStorage</code>.
+    <br><br>
+    C'est temporaire jusqu'à ce que l'IT décide du serveur d'auth cible (Azure AD ? LDAP ? ASP.NET auth <code>http://hti-dtswebsrv:2020/api/Auth</code> ?).
+  </div>
+
+  <h3>13.2 Comment activer l'auth réelle</h3>
+  <ol>
+    <li>Restaurer le code d'auth ASP.NET dans <code>services/auth.ts</code> (voir historique git avant commit <code>060a13d</code>)</li>
+    <li>Ajouter dans <code>nginx.conf</code> un <code>location /auth-api/</code> qui proxy vers le serveur d'auth</li>
+    <li>Ajouter <code>VITE_AUTH_API_URL</code> comme build arg dans <code>docker-compose.yml</code></li>
+    <li>Test end-to-end</li>
+  </ol>
+
+  <h3>13.3 RBAC backend (préparé, non activé)</h3>
+  <p><code>backend/models/rbac.py</code> définit Roles + Permissions. <code>scripts/seed_rbac.py</code> peuple la table au startup. Actuellement <strong>désactivé</strong> dans <code>lifespan</code> — à réactiver quand l'auth réelle sera en place.</p>
+
+  <h3>13.4 Middleware sécurité en place</h3>
+  <ul>
+    <li><strong>TrustedHostMiddleware</strong> — rejette les requêtes avec Host non whitelisté (config via <code>ALLOWED_HOSTS</code>)</li>
+    <li><strong>CORSMiddleware</strong> — restreint les origins (<code>CORS_ORIGINS</code>)</li>
+    <li><strong>SecurityHeadersMiddleware</strong> — ajoute HSTS, X-Frame-Options, X-Content-Type-Options, etc.</li>
+    <li><strong>SlowAPIMiddleware</strong> — rate limit 200 req/min par IP</li>
+  </ul>
+
+  <h3>13.5 Secrets management</h3>
+  <ul>
+    <li><strong>Jamais commiter</strong> le <code>.env</code> réel (déjà dans .gitignore)</li>
+    <li>Utiliser <code>.env.example</code> comme template</li>
+    <li>Les <code>SECRET_KEY</code> / <code>REFRESH_SECRET_KEY</code> doivent être générés avec <code>openssl rand -hex 64</code> — jamais réutiliser entre envs</li>
+    <li>Le <code>AZURE_CLIENT_SECRET</code> doit être rotationné selon la politique IT sécurité (1 an typique)</li>
+  </ul>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<section id="s14">
+  <h2><span class="anchor">14.</span> Debug &amp; logs</h2>
+
+  <h3>14.1 Backend</h3>
+  <p>En local, uvicorn affiche les logs stdout. En prod :</p>
+<pre><span class="cmt"># Voir les logs recents</span>
+<span class="cmd">docker</span> compose logs --tail=100 backend
+
+<span class="cmt"># Suivre en temps reel</span>
+<span class="cmd">docker</span> compose logs -f backend
+
+<span class="cmt"># Filtrer sur ERROR / WARNING</span>
+<span class="cmd">docker</span> compose logs backend | <span class="cmd">grep</span> -E <span class="str">"ERROR|WARNING"</span>
+
+<span class="cmt"># Shell dans le container pour investigation</span>
+<span class="cmd">docker</span> compose exec backend bash</pre>
+
+  <h3>14.2 Frontend</h3>
+  <p><strong>F12 → Console</strong> pour erreurs JS runtime. <strong>F12 → Network</strong> pour voir les requêtes API + payload + status.</p>
+  <p><strong>React Query DevTools</strong> — si vous voulez inspecter le cache client, ajoutez temporairement dans <code>main.tsx</code> :</p>
+<pre><span class="kw">import</span> { ReactQueryDevtools } <span class="kw">from</span> <span class="str">'@tanstack/react-query-devtools'</span>
+
+<span class="cmt">// Dans le return de App</span>
+&lt;ReactQueryDevtools initialIsOpen={false} /&gt;</pre>
+
+  <h3>14.3 SQL debug</h3>
+  <p>Pour voir exactement quelle SQL est envoyée à Databricks, ajouter un <code>print</code> temporaire dans le repository :</p>
+<pre><span class="py">print</span>(<span class="str">f"[DEBUG SQL] {query}"</span>)
+result = <span class="kw">self</span>.db.execute(<span class="py">text</span>(query))</pre>
+
+  <h3>14.4 Databricks direct</h3>
+  <p>Si vous avez accès au workspace Databricks (SQL Editor), collez la SQL générée par le backend pour voir le plan d'exécution, les temps, et itérer plus vite. Puis reportez la version optimisée dans le repository.</p>
+
+  <h3>14.5 Redis inspection</h3>
+<pre><span class="cmd">docker</span> compose exec redis redis-cli
+
+<span class="cmt"># Dans redis-cli :</span>
+DBSIZE                          <span class="cmt"># nombre de cles</span>
+KEYS *                          <span class="cmt"># lister toutes (attention prod !)</span>
+GET <span class="str">"biller-accounts:..."</span>       <span class="cmt"># voir le contenu</span>
+FLUSHDB                         <span class="cmt"># vider tout</span>
+INFO memory                     <span class="cmt"># utilisation memoire</span>
+INFO stats                      <span class="cmt"># hits/misses/evicted</span></pre>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<section id="s15">
+  <h2><span class="anchor">15.</span> Déploiement</h2>
+  <p>Le déploiement production est <strong>entièrement documenté</strong> dans <a href="./GUIDE_DEPLOIEMENT_IT.html">GUIDE_DEPLOIEMENT_IT.html</a>. Résumé rapide :</p>
+
+  <h3>15.1 Workflow standard "j'ai fini une feature, je pousse"</h3>
+<pre><span class="cmt"># 1. Localement</span>
+<span class="cmd">git</span> add . &amp;&amp; <span class="cmd">git</span> commit -m <span class="str">"feat(x): description"</span>
+<span class="cmd">git</span> push origin main
+
+<span class="cmt"># 2. Sur le serveur (SSH root@ht-moncashreporting)</span>
+<span class="cmd">cd</span> /opt/moncash-portal
+<span class="cmd">git</span> pull origin main
+<span class="cmd">docker</span> compose build &amp;&amp; <span class="cmd">docker</span> compose up -d
+
+<span class="cmt"># 3. Verifier</span>
+<span class="cmd">docker</span> compose ps
+<span class="cmd">docker</span> compose logs --tail=30 backend</pre>
+
+  <h3>15.2 Ce qui se déploie quand</h3>
+  <table>
+    <thead><tr><th>Changement</th><th>Rebuild nécessaire</th></tr></thead>
+    <tbody>
+      <tr><td>Code Python backend</td><td><code>docker compose build backend</code></td></tr>
+      <tr><td>Code TypeScript / assets frontend</td><td><code>docker compose build frontend</code></td></tr>
+      <tr><td>nginx.conf</td><td><code>docker compose build frontend</code></td></tr>
+      <tr><td>docker-compose.yml</td><td>Juste <code>up -d --force-recreate</code></td></tr>
+      <tr><td>.env (env vars)</td><td>Juste <code>up -d --force-recreate</code> du service concerné</td></tr>
+      <tr><td>Doc markdown / HTML</td><td>Rien — juste versionné pour référence</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<section id="s16">
+  <h2><span class="anchor">16.</span> Conventions &amp; workflow</h2>
+
+  <h3>16.1 Style de code</h3>
+
+  <h4>Python (backend)</h4>
+  <ul>
+    <li>PEP 8 (défaut)</li>
+    <li>Type hints partout — <code>-&gt; List[Dict[str, Any]]</code> pas <code>-&gt; list</code></li>
+    <li>Docstrings pour les fonctions publiques et méthodes de repository (au moins Args + Returns)</li>
+    <li>4 espaces d'indentation (pas de tabs)</li>
+    <li>Fichiers &lt; 3000 lignes — sinon splitter par domaine</li>
+  </ul>
+
+  <h4>TypeScript (frontend)</h4>
+  <ul>
+    <li><code>strict: true</code> + <code>noUnusedLocals: true</code> — le build casse si vous avez un import inutilisé</li>
+    <li>2 espaces d'indentation</li>
+    <li>Composants React en <strong>function components</strong> (pas de class)</li>
+    <li>Design system tokens partout — pas de hex hardcodés</li>
+    <li>Hooks React Query dans <code>hooks/useAnalytics.ts</code> — un hook par endpoint</li>
+    <li>Composants réutilisables dans <code>components/</code>, pages dans <code>pages/</code></li>
+  </ul>
+
+  <h3>16.2 Commit messages — Conventional Commits</h3>
+<pre><span class="cmt"># Format :</span>
+&lt;type&gt;(&lt;scope&gt;): &lt;short description&gt;
+
+[optional body]
+
+[optional footer]
+
+<span class="cmt"># Types :</span>
+feat        : nouvelle fonctionnalite
+fix         : correction de bug
+refactor    : reorganisation code sans changement de comportement
+docs        : uniquement doc
+style       : formatage, whitespace
+chore       : maintenance (deps, build)
+perf        : optimisation performance
+
+<span class="cmt"># Scopes courants :</span>
+backend, frontend, sidebar, snapshots, agent-otc, docker, docs, ...
+
+<span class="cmt"># Exemples :</span>
+feat(agent-otc): add period filter to display
+fix(cors): allow https://ht-moncashreporting.digicelgroup.local
+refactor(snapshots): extract SnapshotCell to shared chrome
+docs: add developer guide (this file)</pre>
+
+  <h3>16.3 Git workflow</h3>
+  <p>Actuellement : <strong>trunk-based</strong> — push directement sur <code>main</code>. Pas de branches / PR pour l'instant (petite équipe).</p>
+  <p>Quand l'équipe grandit → passer à feature branches + PR review :</p>
+  <ol>
+    <li><code>git checkout -b feat/mon-changement</code></li>
+    <li>Commits</li>
+    <li><code>git push -u origin feat/mon-changement</code></li>
+    <li>Ouvrir PR sur GitHub → review → merge sur main</li>
+    <li>Sur serveur : <code>git pull</code> + rebuild</li>
+  </ol>
+
+  <h3>16.4 Choses à NE JAMAIS faire</h3>
+  <ul>
+    <li>❌ Commiter le <code>.env</code> réel (secrets)</li>
+    <li>❌ Écrire du SQL dans un router ou un service (toujours repository)</li>
+    <li>❌ Utiliser des couleurs hex hardcodées dans les composants (utiliser les tokens)</li>
+    <li>❌ <code>fontWeight: 800+</code> — trop shouty pour l'aesthetic</li>
+    <li>❌ Faire du DELETE / UPDATE / INSERT sur Databricks (read-only par convention)</li>
+    <li>❌ Push directement sur main sans faire tourner <code>npm run build</code> localement (le build strict TypeScript peut casser)</li>
+  </ul>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<section id="s17">
+  <h2><span class="anchor">17.</span> FAQ</h2>
+
+  <h3>17.1 Pourquoi Databricks et pas Postgres/MySQL ?</h3>
+  <p>Le data warehouse Digicel Haiti est déjà sur Databricks. Le portail ne fait que consommer (read-only) — il n'y a pas d'écriture métier côté portail (sauf éventuellement la table users pour l'auth future).</p>
+
+  <h3>17.2 Pourquoi FastAPI et pas Django/Flask ?</h3>
+  <p>Async natif, docs OpenAPI auto (Swagger), typé (Pydantic), écosystème moderne. Pour une API pure c'est le meilleur choix Python actuellement.</p>
+
+  <h3>17.3 Pourquoi Vite et pas Next.js ?</h3>
+  <p>Pas besoin de SSR (portail interne, pas de SEO). Vite est plus rapide en dev, plus simple à comprendre, et le déploiement en static bundle derrière nginx est trivial.</p>
+
+  <h3>17.4 Le container backend redémarre en boucle, pourquoi ?</h3>
+  <p>Presque toujours : <code>.env</code> mal configuré (var manquante) ou creds Azure invalides. <code>docker compose logs backend</code> vous dira exactement quelle var manque.</p>
+
+  <h3>17.5 Le frontend build échoue avec des erreurs TypeScript, pourquoi ?</h3>
+  <p>Le tsconfig est <strong>strict</strong> — <code>noUnusedLocals: true</code> notamment. Import inutilisé ou variable non lue = build casse. Solution : nettoyer les imports.</p>
+
+  <h3>17.6 Comment lancer les tests ?</h3>
+  <p>Pas encore de suite de tests automatisés — chantier ouvert. Recommandation quand ça se fera : <code>pytest</code> pour le backend, <code>vitest</code> + <code>testing-library</code> pour le frontend.</p>
+
+  <h3>17.7 Peut-on ajouter une écriture SQL (INSERT/UPDATE) ?</h3>
+  <p>Techniquement oui, mais **à éviter** — le Service Principal est configuré read-only sur Databricks pour raison de sécurité. Si écriture nécessaire, discutez avec Data Eng — probablement mieux d'avoir un pipeline ETL séparé qui écrit dans une table dédiée.</p>
+
+  <h3>17.8 Comment ajouter une nouvelle langue (i18n) ?</h3>
+  <p>Pas encore internationalisé. Si besoin : installer <code>react-i18next</code>, créer <code>src/i18n/{en,fr}.json</code>, wrapper les strings du JSX avec <code>t()</code>. Sujet à discuter avant de commencer (impact important).</p>
+
+  <h3>17.9 Où trouver la référence complète des endpoints ?</h3>
+  <p><a href="http://localhost:8000/docs">http://localhost:8000/docs</a> en local, <a href="https://ht-moncashreporting.digicelgroup.local/api/docs">https://ht-moncashreporting.digicelgroup.local/api/docs</a> en prod. Swagger UI interactive avec "Try it out".</p>
+
+  <h3>17.10 J'ai un doute sur une modif — qui contacter ?</h3>
+  <ul>
+    <li><strong>Mike JEAN LOUIS</strong> — jeanlouismike89@gmail.com (owner/dev principal)</li>
+    <li><strong>IT infra</strong> — pour tout ce qui concerne le serveur / réseau</li>
+    <li><strong>IT sécurité</strong> — pour tout ce qui concerne Azure SP / certificats</li>
+    <li><strong>Data Engineering</strong> — pour tout ce qui concerne les tables Databricks</li>
+  </ul>
+</section>
+
+</main>
+</div>
+
+<footer>
+  MonCash BI Portal · Guide Développeur · v1.0 · Digicel Haiti<br>
+  Source : <a href="https://github.com/Mike5449/MonCash_BI">github.com/Mike5449/MonCash_BI</a> — voir aussi <a href="./GUIDE_DEPLOIEMENT_IT.html">GUIDE_DEPLOIEMENT_IT.html</a> pour la partie ops
+</footer>
+
+</body>
+</html>
