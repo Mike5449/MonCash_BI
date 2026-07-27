@@ -76,9 +76,15 @@ export default function Customers() {
   const [isExporting, setIsExporting] = useState(false)
   const [exportProgress, setExportProgress] = useState<ExportProgress | null>(null)
 
-  const { data: customers, isLoading, isFetching, refetch } = useCustomers(filters)
-  const { data: summary, isFetching: isLoadingSummary } = useCustomerSummary(filters)
+  const { data: customersData, isLoading, isFetching, refetch, error: customersError } = useCustomers(filters)
+  const { data: summaryData, isFetching: isLoadingSummary, error: summaryError } = useCustomerSummary(filters)
   const uploadBulk = useUploadBulk()
+
+  // Defensive: the backend can return a non-array error payload (e.g. {"detail": "..."}) on failure.
+  // Always coerce to an array before iterating so a bad response never crashes the whole page.
+  const customers = Array.isArray(customersData) ? customersData : []
+  const summary = (summaryData && typeof summaryData === 'object' && !Array.isArray(summaryData)) ? summaryData as any : {}
+  const apiError = customersError || summaryError
 
   const handleFilterChange = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>) => {
     const { name, value } = e.target
@@ -668,7 +674,26 @@ export default function Customers() {
                       <div style={{ fontSize: 'var(--fs-body)', color: 'var(--text-secondary)' }}>Loading customer base…</div>
                     </div>
                   </td></tr>
-                ) : !customers || customers.length === 0 ? (
+                ) : apiError ? (
+                  <tr><td colSpan={21} style={{ padding: 'var(--space-16) 0', textAlign: 'center', color: 'var(--text-tertiary)' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 'var(--space-3)' }}>
+                      <XCircle size={24} strokeWidth={1.5} color="var(--negative)" opacity={0.6} />
+                      <div style={{ fontSize: 'var(--fs-body)', color: 'var(--text-primary)', fontWeight: 600 }}>Server error loading customers</div>
+                      <div style={{ fontSize: 'var(--fs-label)', color: 'var(--text-secondary)', maxWidth: 480 }}>
+                        The Databricks query failed. Verify that Azure Service Principal credentials are configured on the server, then click Refresh.
+                      </div>
+                      <button onClick={() => refetch()} style={{
+                        marginTop: 'var(--space-2)',
+                        background: 'var(--surface-card)', color: 'var(--text-primary)',
+                        border: '1px solid var(--border-default)',
+                        padding: 'var(--space-2) var(--space-4)',
+                        borderRadius: 'var(--radius-md)',
+                        fontSize: 'var(--fs-body)', fontWeight: 500,
+                        cursor: 'pointer',
+                      }}>Retry</button>
+                    </div>
+                  </td></tr>
+                ) : customers.length === 0 ? (
                   <tr><td colSpan={21} style={{ padding: 'var(--space-16) 0', textAlign: 'center', color: 'var(--text-tertiary)' }}>
                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 'var(--space-3)' }}>
                       <XCircle size={24} strokeWidth={1.5} opacity={0.4} />
@@ -1107,7 +1132,7 @@ function SummaryCard({ title, total, accent, stats, loading }: any) {
           columnGap: 'var(--space-5)',
           rowGap: 'var(--space-3)',
         }}>
-          {stats.map((s: any) => (
+          {(Array.isArray(stats) ? stats : []).map((s: any) => (
             <div key={s.label} style={{
               display: 'flex', alignItems: 'center',
               gap: 'var(--space-3)',
