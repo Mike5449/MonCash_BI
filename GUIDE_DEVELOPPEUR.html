@@ -1265,6 +1265,52 @@ _YYYYMMDD = re.<span class="py">compile</span>(<span class="str">r"^\d{8}$"</spa
 <span class="cmt"># Verifier</span>
 <span class="cmd">docker</span> compose ps
 <span class="cmd">docker</span> compose logs --tail=30 backend | <span class="cmd">grep</span> -E <span class="str">"startup|ERROR"</span></pre>
+
+  <h3>11.7 Forker le repo &amp; déployer sur un autre serveur ou une autre instance</h3>
+  <p>Cas d'usage : vous voulez expérimenter des changements sur votre propre serveur sans toucher la prod, ou déployer une instance parallèle (autre pays, autre équipe métier). Vue d'ensemble — pour le détail complet, voir <a href="./GUIDE_DEPLOIEMENT_IT.html#s15">§15 du Guide IT</a>.</p>
+
+  <h4>Étape 1 — Fork ou copie du repo</h4>
+<pre><span class="cmt"># Option A : Fork public sur GitHub via l'UI</span>
+<span class="cmt">#   github.com/Mike5449/MonCash_BI -&gt; bouton "Fork" en haut a droite</span>
+<span class="cmt">#   -&gt; Choisir votre org (ex: digicel-haiti/MonCash_BI-fork)</span>
+
+<span class="cmt"># Option B : Miroir vers Bitbucket / GitLab interne Digicel</span>
+<span class="cmd">git</span> clone --mirror https://github.com/Mike5449/MonCash_BI.git
+<span class="cmd">cd</span> MonCash_BI.git
+<span class="cmd">git</span> push --mirror https://bitbucket.digicelgroup.local/digicel-haiti/moncash-bi.git</pre>
+
+  <h4>Étape 2 — Cloner sur le serveur cible</h4>
+<pre><span class="cmt"># Repo public (fork GitHub)</span>
+<span class="cmd">git</span> clone https://github.com/votre-org/votre-fork.git /opt/moncash-portal
+
+<span class="cmt"># Repo prive - utiliser une Deploy Key SSH (recommande, voir §15.2 du guide IT)</span>
+<span class="cmd">ssh-keygen</span> -t ed25519 -f ~/.ssh/moncash_deploy -N <span class="str">""</span>
+<span class="cmd">cat</span> ~/.ssh/moncash_deploy.pub  <span class="cmt"># -&gt; a copier dans repo -&gt; Deploy Keys</span>
+<span class="cmd">git</span> clone git@github.com:votre-org/votre-fork.git /opt/moncash-portal</pre>
+
+  <h4>Étape 3 — Adapter les identités si vous renommez</h4>
+  <p>Si votre instance a un nouveau nom (ex: <code>moncash-bi-jamaica</code>) :</p>
+  <ul>
+    <li><code>docker-compose.yml</code> : <code>container_name</code> et <code>image</code> avec le nouveau préfixe</li>
+    <li><code>.env</code> : <code>ALLOWED_HOSTS</code> + <code>CORS_ORIGINS</code> avec les nouveaux hostnames</li>
+    <li>Certificat SSL avec le nouveau CN</li>
+    <li>Éventuellement <code>CRON_TZ</code> pour le flush cache si autre fuseau horaire</li>
+  </ul>
+
+  <h4>Étape 4 — Suivre le reste du Guide IT</h4>
+  <p>Après le clone, le reste du déploiement (setup .env, build, up, HTTPS, cron cache, etc.) est identique — suivez <a href="./GUIDE_DEPLOIEMENT_IT.html">GUIDE_DEPLOIEMENT_IT.html</a> à partir du §7.</p>
+
+  <h4>Étape 5 — Garder votre fork synchronisé avec upstream</h4>
+<pre><span class="cmt"># Une seule fois : ajouter le repo original comme upstream</span>
+<span class="cmd">cd</span> /opt/moncash-portal
+<span class="cmd">git</span> remote add upstream https://github.com/Mike5449/MonCash_BI.git
+
+<span class="cmt"># A chaque fois qu'il y a des updates a tirer :</span>
+<span class="cmd">git</span> fetch upstream
+<span class="cmd">git</span> merge upstream/main   <span class="cmt"># resoudre conflits eventuels</span>
+<span class="cmd">git</span> push origin main
+<span class="cmd">docker</span> compose build &amp;&amp; <span class="cmd">docker</span> compose up -d</pre>
+  <div class="callout info">Pour un environnement <strong>dev/test</strong> qui doit rester alignés avec la prod, un cron sur le serveur peut automatiser le pull toutes les nuits — mais laissez le déploiement manuel pour la vraie prod.</div>
 </section>
 
 <!-- ═══════════════════════════════════════════════════════════════ -->
