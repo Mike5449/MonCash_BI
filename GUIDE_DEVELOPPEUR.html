@@ -1267,13 +1267,13 @@ _YYYYMMDD = re.<span class="py">compile</span>(<span class="str">r"^\d{8}$"</spa
 <span class="cmd">docker</span> compose logs --tail=30 backend | <span class="cmd">grep</span> -E <span class="str">"startup|ERROR"</span></pre>
 
   <h3>11.7 Déployer depuis un autre repository</h3>
-  <p>Cas d'usage : le code source vit ailleurs que le repo GitHub canonique (miroir Bitbucket/GitLab interne Digicel, autre organisation, repo privé). Vue d'ensemble ici — pour le détail complet, voir <a href="./GUIDE_DEPLOIEMENT_IT.html#s15">§15 du Guide IT</a>.</p>
+  <p>Cas d'usage : le code source vit ailleurs que le repo GitHub canonique (miroir Bitbucket / GitLab interne Digicel, autre organisation). Vue d'ensemble ici — pour le détail complet, voir <a href="./GUIDE_DEPLOIEMENT_IT.html#s14">§14 du Guide IT</a>.</p>
 
   <h4>Étape 1 — Cloner sur le serveur cible</h4>
 <pre><span class="cmt"># Repo public</span>
 <span class="cmd">git</span> clone https://votre-host/votre-org/votre-repo.git /opt/moncash-portal
 
-<span class="cmt"># Repo prive - utiliser une Deploy Key SSH (recommande, voir §15.2 du guide IT)</span>
+<span class="cmt"># Repo prive - utiliser une Deploy Key SSH (recommande)</span>
 <span class="cmd">ssh-keygen</span> -t ed25519 -f ~/.ssh/moncash_deploy -N <span class="str">""</span>
 <span class="cmd">cat</span> ~/.ssh/moncash_deploy.pub  <span class="cmt"># -&gt; a copier dans repo -&gt; Deploy Keys</span>
 <span class="cmd">git</span> clone git@github.com:votre-org/votre-repo.git /opt/moncash-portal</pre>

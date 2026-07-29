@@ -388,11 +388,10 @@ footer {
       <li><a href="#s8"><span class="num">8.</span> Build &amp; démarrage</a></li>
       <li><a href="#s9"><span class="num">9.</span> Vérifications</a></li>
       <li><a href="#s10"><span class="num">10.</span> DNS &amp; accès</a></li>
-      <li><a href="#s11"><span class="num">11.</span> Mode démo actuel</a></li>
-      <li><a href="#s12"><span class="num">12.</span> Maintenance</a></li>
-      <li><a href="#s13"><span class="num">13.</span> Dépannage</a></li>
-      <li><a href="#s14"><span class="num">14.</span> Annexes</a></li>
-      <li><a href="#s15"><span class="num">15.</span> Depuis un autre repository</a></li>
+      <li><a href="#s11"><span class="num">11.</span> Maintenance</a></li>
+      <li><a href="#s12"><span class="num">12.</span> Dépannage</a></li>
+      <li><a href="#s13"><span class="num">13.</span> Annexes</a></li>
+      <li><a href="#s14"><span class="num">14.</span> Depuis un autre repository</a></li>
       <li><a href="#resume"><span class="num">🎯</span> Résumé — 10 commandes</a></li>
     </ol>
   </nav>
@@ -835,49 +834,16 @@ EOF
 
 <!-- ═══════════════════════════════════════════════════════════════ -->
 <section id="s11">
-  <h2><span class="anchor">11.</span> Mode démo actuel &amp; prochaines étapes</h2>
+  <h2><span class="anchor">11.</span> Maintenance</h2>
 
-  <h3>11.1 État actuel du login</h3>
-  <div class="callout warn">Actuellement (2026-07-17), l'authentification est en <strong>mode démo</strong> :
-    <ul>
-      <li>Le champ accepte <strong>n'importe quel username</strong> (pas de format email requis)</li>
-      <li><strong>N'importe quel mot de passe</strong> (non vide) est accepté</li>
-      <li>Aucune vérification côté serveur, session uniquement stockée en <code>localStorage</code> du navigateur</li>
-    </ul>
-  </div>
-
-  <h3>11.2 Activation de l'authentification réelle</h3>
-  <p><strong>Objectif à moyen terme :</strong> brancher le portail sur l'annuaire d'entreprise (LDAP / Azure AD / ASP.NET auth existant à <code>http://hti-dtswebsrv:2020/api/Auth</code>).</p>
-  <p><strong>Modifications nécessaires :</strong></p>
-  <ol>
-    <li>Restaurer le code d'auth ASP.NET dans <code>frontend/src/services/auth.ts</code> (voir historique git avant le commit <code>060a13d</code>)</li>
-    <li>Ajouter dans <code>frontend/nginx.conf</code> un <code>location /auth-api/</code> proxy vers le serveur d'auth</li>
-    <li>Ajouter la variable <code>VITE_AUTH_API_URL</code> dans le build frontend</li>
-    <li>Tester le login end-to-end</li>
-  </ol>
-  <p>Cette activation nécessitera un <strong>rebuild frontend + redéploiement</strong> (~2 min).</p>
-
-  <h3>11.3 Complétion des analytics (Azure SP)</h3>
-  <p>Tant que les 3 vars <code>AZURE_*=</code> restent vides dans <code>.env</code>, <strong>les pages analytics affichent des erreurs 500</strong>. Dès livraison des creds :</p>
-<pre><span class="cmd">cd</span> /opt/moncash-portal
-<span class="cmd">nano</span> .env    <span class="cmt"># remplir AZURE_TENANT_ID, AZURE_CLIENT_ID, AZURE_CLIENT_SECRET</span>
-<span class="cmd">docker</span> compose restart backend
-<span class="cmd">docker</span> compose logs -f backend | <span class="cmd">grep</span> -E <span class="str">"AUTH|token"</span></pre>
-  <div class="expected"><code>[AUTH] Success! Token acquired. Expires in XX minutes.</code></div>
-</section>
-
-<!-- ═══════════════════════════════════════════════════════════════ -->
-<section id="s12">
-  <h2><span class="anchor">12.</span> Maintenance</h2>
-
-  <h3>12.1 Mise à jour du code (déploiement de nouvelle version)</h3>
+  <h3>11.1 Mise à jour du code (déploiement de nouvelle version)</h3>
 <pre><span class="cmd">cd</span> /opt/moncash-portal
 <span class="cmd">git</span> pull origin main
 <span class="cmd">docker</span> compose build
 <span class="cmd">docker</span> compose up -d</pre>
   <p>Docker Compose détecte automatiquement les images qui ont changé et ne redémarre que les containers concernés.</p>
 
-  <h3>12.2 Consultation des logs</h3>
+  <h3>11.2 Consultation des logs</h3>
 <pre><span class="cmt"># En temps reel, tous services</span>
 <span class="cmd">docker</span> compose logs -f
 
@@ -890,7 +856,7 @@ EOF
 <span class="cmt"># Logs persistes sur disque (Docker gere la rotation automatiquement)</span>
 <span class="cmd">docker</span> inspect --format=<span class="str">'{{.LogPath}}'</span> bi-backend</pre>
 
-  <h3>12.3 Redémarrage</h3>
+  <h3>11.3 Redémarrage</h3>
 <pre><span class="cmt"># Redemarrer un service seul</span>
 <span class="cmd">docker</span> compose restart backend
 
@@ -900,11 +866,11 @@ EOF
 <span class="cmt"># Recreer les containers (apres modif .env)</span>
 <span class="cmd">docker</span> compose up -d --force-recreate</pre>
 
-  <h3>12.4 Vidage du cache Redis</h3>
+  <h3>11.4 Vidage du cache Redis</h3>
   <p>Si des analytics semblent obsolètes :</p>
 <pre><span class="cmd">docker</span> compose exec redis redis-cli FLUSHDB</pre>
 
-  <h3>12.5 Arrêt / reprise du stack</h3>
+  <h3>11.5 Arrêt / reprise du stack</h3>
 <pre><span class="cmt"># Arret propre (containers stoppes, volumes conserves)</span>
 <span class="cmd">docker</span> compose stop
 
@@ -917,7 +883,7 @@ EOF
 <span class="cmt"># Arret + suppression totale (perte cache Redis)</span>
 <span class="cmd">docker</span> compose down -v</pre>
 
-  <h3>12.6 Nettoyage disque</h3>
+  <h3>11.6 Nettoyage disque</h3>
 <pre><span class="cmt"># Verifier l'espace utilise par Docker</span>
 <span class="cmd">docker</span> system df
 
@@ -925,7 +891,7 @@ EOF
 <span class="cmd">docker</span> system prune -a --volumes -f</pre>
   <div class="callout warn">Ce nettoyage supprime : toutes les images non utilisées par un container UP, tous les volumes non attachés, tout le cache de build.</div>
 
-  <h3>12.7 Sauvegarde</h3>
+  <h3>11.7 Sauvegarde</h3>
   <p><strong>Ce qui est à sauvegarder :</strong></p>
   <ul>
     <li><code>/opt/moncash-portal/.env</code> — configuration + secrets JWT (irréversible si perdu = tous les tokens invalidés)</li>
@@ -934,7 +900,7 @@ EOF
 <pre><span class="cmt"># Copier .env vers un stockage securise</span>
 <span class="cmd">cp</span> /opt/moncash-portal/.env /backups/moncash-portal-env-$(<span class="cmd">date</span> +%Y%m%d).bak</pre>
 
-  <h3>12.8 Flush automatique du cache Redis (1 AM heure Haïti)</h3>
+  <h3>11.8 Flush automatique du cache Redis (1 AM heure Haïti)</h3>
   <p>Puisque les données Databricks sont <strong>J-1</strong> (ETL nocturne), le cache est configuré pour tenir 25 heures (<code>CACHE_DEFAULT_TTL=90000</code> dans <code>.env</code>) et est <strong>vidé totalement chaque nuit à 1 AM heure Haïti</strong> par un cron sur l'hôte. Les utilisateurs voient ainsi les données rafraîchies dès le début de la journée suivante sans réveiller inutilement le SQL warehouse Databricks pendant la journée.</p>
   <p><strong>Installation du cron flush (setup one-shot)</strong> — à faire après le déploiement :</p>
 <pre><span class="cmt"># 1. Verifier que le fuseau America/Port-au-Prince est dispo</span>
@@ -985,10 +951,10 @@ EOF
 </section>
 
 <!-- ═══════════════════════════════════════════════════════════════ -->
-<section id="s13">
-  <h2><span class="anchor">13.</span> Dépannage</h2>
+<section id="s12">
+  <h2><span class="anchor">12.</span> Dépannage</h2>
 
-  <h3>13.1 Le container backend redémarre en boucle</h3>
+  <h3>12.1 Le container backend redémarre en boucle</h3>
   <p><strong>Diagnostic :</strong> <code>docker compose logs backend | tail -50</code></p>
   <table>
     <thead><tr><th>Message d'erreur</th><th>Cause</th><th>Résolution</th></tr></thead>
@@ -1000,19 +966,19 @@ EOF
     </tbody>
   </table>
 
-  <h3>13.2 Le frontend charge mais toutes les requêtes API retournent 502</h3>
+  <h3>12.2 Le frontend charge mais toutes les requêtes API retournent 502</h3>
   <p>Le backend n'est pas encore prêt (démarrage lent au premier boot) OU crashe.</p>
 <pre><span class="cmd">docker</span> compose ps                     <span class="cmt"># verifier "healthy"</span>
 <span class="cmd">docker</span> compose logs backend | <span class="cmd">tail</span> -30
 <span class="cmd">docker</span> compose restart backend</pre>
 
-  <h3>13.3 « CORS policy blocked » dans la console navigateur</h3>
+  <h3>12.3 « CORS policy blocked » dans la console navigateur</h3>
   <p>L'URL utilisée dans le navigateur n'est pas dans <code>CORS_ORIGINS</code> du <code>.env</code>.</p>
 <pre><span class="cmd">grep</span> CORS_ORIGINS /opt/moncash-portal/.env
 <span class="cmd">sed</span> -i <span class="str">'s|^CORS_ORIGINS=.*|&,http://nouvelle-url.digicel.local|'</span> /opt/moncash-portal/.env
 <span class="cmd">docker</span> compose restart backend</pre>
 
-  <h3>13.4 « Not able to reach the server » depuis le navigateur</h3>
+  <h3>12.4 « Not able to reach the server » depuis le navigateur</h3>
   <p><strong>Diagnostic étape par étape :</strong></p>
   <ol>
     <li>Depuis le serveur : <code>curl http://localhost/</code> → doit retourner du HTML</li>
@@ -1021,18 +987,18 @@ EOF
     <li>Si <code>True</code> mais navigateur ne charge pas → vider le cache navigateur, tester en navigation privée.</li>
   </ol>
 
-  <h3>13.5 Requêtes lentes / timeouts sur les analytics</h3>
+  <h3>12.5 Requêtes lentes / timeouts sur les analytics</h3>
   <div class="callout info"><strong>Cause connue :</strong> les Databricks SQL warehouses <strong>auto-suspend</strong> après ~10 min sans requête. La première requête après suspend prend 15-30 s pour « réveiller » le cluster. C'est <strong>normal</strong>.</div>
   <p>Solution long-terme : configurer le warehouse en <code>Always On</code> (coût financier plus élevé, à valider avec Finance).</p>
 
-  <h3>13.6 Le stack ne démarre pas après un <code>docker compose up -d</code></h3>
+  <h3>12.6 Le stack ne démarre pas après un <code>docker compose up -d</code></h3>
 <pre><span class="cmd">docker</span> compose ps                    <span class="cmt"># voir quel container a un probleme</span>
 <span class="cmd">docker</span> compose logs &lt;service&gt;
 <span class="cmd">docker</span> compose down                  <span class="cmt"># tout arreter proprement</span>
 <span class="cmd">docker</span> system df                     <span class="cmt"># verifier espace disque</span>
 <span class="cmd">docker</span> compose up -d --force-recreate</pre>
 
-  <h3>13.7 Erreur « no space left on device » pendant le build</h3>
+  <h3>12.7 Erreur « no space left on device » pendant le build</h3>
 <pre><span class="cmd">docker</span> system df                  <span class="cmt"># voir l'espace utilise</span>
 <span class="cmd">docker</span> builder prune -f           <span class="cmt"># vider le cache de build</span>
 <span class="cmd">docker</span> image prune -a -f          <span class="cmt"># supprimer images inutilisees</span>
@@ -1040,8 +1006,8 @@ EOF
 </section>
 
 <!-- ═══════════════════════════════════════════════════════════════ -->
-<section id="s14">
-  <h2><span class="anchor">14.</span> Annexes</h2>
+<section id="s13">
+  <h2><span class="anchor">13.</span> Annexes</h2>
 
   <h3>14.1 Structure des fichiers</h3>
 <pre class="diagram">/opt/moncash-portal/
@@ -1162,14 +1128,14 @@ EOF
 </section>
 
 <!-- ═══════════════════════════════════════════════════════════════ -->
-<section id="s15">
-  <h2><span class="anchor">15.</span> Déploiement depuis un autre repository</h2>
+<section id="s14">
+  <h2><span class="anchor">14.</span> Déploiement depuis un autre repository</h2>
   <p>Le guide utilise partout le repo canonique <code>https://github.com/Mike5449/MonCash_BI.git</code>. Si votre code source vit ailleurs (copie interne Bitbucket / GitLab / Azure DevOps Digicel, autre organisation, etc.), l'adaptation est minimale : <strong>remplacer l'URL de <code>git clone</code></strong>.</p>
   <p>Dans le guide §6, remplacez :</p>
 <pre><span class="cmd">git</span> clone https://github.com/Mike5449/MonCash_BI.git moncash-portal</pre>
   <p>par :</p>
 <pre><span class="cmd">git</span> clone https://&lt;host&gt;/&lt;votre-org&gt;/&lt;votre-repo&gt;.git moncash-portal</pre>
-  <p>Tout le reste des §3 à §13 reste <strong>identique</strong>.</p>
+  <p>Tout le reste des §3 à §12 reste <strong>identique</strong>.</p>
 </section>
 
 <!-- ═══════════════════════════════════════════════════════════════ -->

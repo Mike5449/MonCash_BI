@@ -20,10 +20,10 @@ Ce document est un **runbook opérationnel** : chaque étape contient les comman
 8. [Build et démarrage des containers](#8-build-et-démarrage-des-containers)
 9. [Vérifications post-déploiement](#9-vérifications-post-déploiement)
 10. [Accès utilisateurs & DNS](#10-accès-utilisateurs--dns)
-11. [Mode démo actuel & prochaines étapes](#11-mode-démo-actuel--prochaines-étapes)
-12. [Maintenance](#12-maintenance)
-13. [Dépannage](#13-dépannage)
-14. [Annexes](#14-annexes)
+11. [Maintenance](#11-maintenance)
+12. [Dépannage](#12-dépannage)
+13. [Annexes](#13-annexes)
+14. [Déploiement depuis un autre repository](#14-déploiement-depuis-un-autre-repository)
 
 ---
 
@@ -512,44 +512,9 @@ http://<IP_serveur>/
 
 ---
 
-## 11. Mode démo actuel & prochaines étapes
+## 11. Maintenance
 
-### 11.1 État actuel du login
-
-Actuellement (2026-07-17), l'authentification est en **mode démo** :
-- Le champ accepte **n'importe quel username** (pas de format email requis)
-- **N'importe quel mot de passe** (non vide) est accepté
-- Aucune vérification côté serveur, session uniquement stockée en `localStorage` du navigateur
-
-### 11.2 Activation de l'authentification réelle
-
-**Objectif à moyen terme** : brancher le portail sur l'annuaire d'entreprise (LDAP / Azure AD / ASP.NET auth existant à `http://hti-dtswebsrv:2020/api/Auth`).
-
-**Modifications nécessaires :**
-1. Restaurer le code d'auth ASP.NET dans `frontend/src/services/auth.ts` (voir historique git avant le commit `060a13d`)
-2. Ajouter dans `frontend/nginx.conf` un `location /auth-api/` proxy vers le serveur d'auth
-3. Ajouter la variable `VITE_AUTH_API_URL` dans le build frontend
-4. Tester le login end-to-end
-
-Cette activation nécessitera un **rebuild frontend + redéploiement** (~2 min).
-
-### 11.3 Complétion des analytics (Azure SP)
-
-Tant que les 3 vars `AZURE_*=` restent vides dans `.env`, **les pages analytics affichent des erreurs 500**. Dès livraison des creds :
-
-```bash
-cd /opt/moncash-portal
-nano .env    # remplir AZURE_TENANT_ID, AZURE_CLIENT_ID, AZURE_CLIENT_SECRET
-docker compose restart backend
-docker compose logs -f backend | grep -E "AUTH|token"
-```
-> Attendu dans les logs : `[AUTH] Success! Token acquired. Expires in XX minutes.`
-
----
-
-## 12. Maintenance
-
-### 12.1 Mise à jour du code (déploiement de nouvelle version)
+### 11.1 Mise à jour du code (déploiement de nouvelle version)
 
 ```bash
 cd /opt/moncash-portal
@@ -559,7 +524,7 @@ docker compose up -d
 ```
 > Docker Compose détecte automatiquement les images qui ont changé et ne redémarre que les containers concernés.
 
-### 12.2 Consultation des logs
+### 11.2 Consultation des logs
 
 ```bash
 # En temps reel, tous services
@@ -575,7 +540,7 @@ docker compose logs backend | grep -E "ERROR|WARNING"
 docker inspect --format='{{.LogPath}}' bi-backend
 ```
 
-### 12.3 Redémarrage
+### 11.3 Redémarrage
 
 ```bash
 # Redemarrer un service seul
@@ -588,14 +553,14 @@ docker compose restart
 docker compose up -d --force-recreate
 ```
 
-### 12.4 Vidage du cache Redis
+### 11.4 Vidage du cache Redis
 
 Si des analytics semblent obsolètes :
 ```bash
 docker compose exec redis redis-cli FLUSHDB
 ```
 
-### 12.5 Arrêt / reprise du stack
+### 11.5 Arrêt / reprise du stack
 
 ```bash
 # Arret propre (containers stoppes, volumes conserves)
@@ -611,7 +576,7 @@ docker compose down
 docker compose down -v
 ```
 
-### 12.6 Nettoyage disque
+### 11.6 Nettoyage disque
 
 ```bash
 # Verifier l'espace utilise par Docker
@@ -626,7 +591,7 @@ docker system prune -a --volumes -f
 #  - Tout le cache de build
 ```
 
-### 12.7 Sauvegarde
+### 11.7 Sauvegarde
 
 **Ce qui est à sauvegarder :**
 - `/opt/moncash-portal/.env` — configuration + secrets JWT (irréversible si perdu = tous les tokens invalidés)
@@ -638,7 +603,7 @@ docker system prune -a --volumes -f
 cp /opt/moncash-portal/.env /backups/moncash-portal-env-$(date +%Y%m%d).bak
 ```
 
-### 12.8 Flush automatique du cache Redis (1 AM heure Haïti)
+### 11.8 Flush automatique du cache Redis (1 AM heure Haïti)
 
 Puisque les données Databricks sont **J-1** (ETL nocturne), le cache est configuré
 pour tenir 25 heures (`CACHE_DEFAULT_TTL=90000` dans `.env`) et est **vidé
@@ -704,9 +669,9 @@ crontab -l | sed '/FLUSHDB/s/^#//' | crontab -
 
 ---
 
-## 13. Dépannage
+## 12. Dépannage
 
-### 13.1 Le container backend redémarre en boucle
+### 12.1 Le container backend redémarre en boucle
 
 **Diagnostic :**
 ```bash
@@ -720,7 +685,7 @@ docker compose logs backend | tail -50
 | `Could not resolve host: adb-...` | DNS ou connectivité Databricks bloquée | Tester `curl https://adb-....azuredatabricks.net` depuis le container |
 | `Connection refused` sur `login.microsoftonline.com` | Port 443 sortant bloqué vers Azure | Ouvrir la règle firewall |
 
-### 13.2 Le frontend charge mais toutes les requêtes API retournent 502
+### 12.2 Le frontend charge mais toutes les requêtes API retournent 502
 
 Le backend n'est pas encore prêt (démarrage lent au premier boot) OU crashe.
 ```bash
@@ -729,7 +694,7 @@ docker compose logs backend | tail -30
 docker compose restart backend
 ```
 
-### 13.3 « CORS policy blocked » dans la console navigateur
+### 12.3 « CORS policy blocked » dans la console navigateur
 
 L'URL utilisée dans le navigateur n'est pas dans `CORS_ORIGINS` du `.env`.
 ```bash
@@ -741,7 +706,7 @@ sed -i 's|^CORS_ORIGINS=.*|&,http://nouvelle-url.digicel.local|' /opt/moncash-po
 docker compose restart backend
 ```
 
-### 13.4 « Not able to reach the server » depuis le navigateur
+### 12.4 « Not able to reach the server » depuis le navigateur
 
 **Diagnostic étape par étape :**
 
@@ -753,13 +718,13 @@ docker compose restart backend
 3. Si `TcpTestSucceeded : False` → firewall inter-VLAN Digicel bloque. Remonter à l'équipe Réseau.
 4. Si `TcpTestSucceeded : True` mais navigateur ne charge pas → vider le cache navigateur, essayer en navigation privée.
 
-### 13.5 Requêtes lentes / timeouts sur les analytics
+### 12.5 Requêtes lentes / timeouts sur les analytics
 
 **Cause connue :** les Databricks SQL warehouses **auto-suspend** après ~10 min sans requête. La première requête après suspend prend 15-30 s pour "réveiller" le cluster. C'est **normal**.
 
 Solution long-terme : configurer le warehouse Databricks en `Always On` (coût financier plus élevé, à valider avec Finance).
 
-### 13.6 Le stack ne démarre pas après un `docker compose up -d`
+### 12.6 Le stack ne démarre pas après un `docker compose up -d`
 
 ```bash
 docker compose ps                    # voir quel container a un probleme
@@ -769,7 +734,7 @@ docker system df                     # verifier espace disque
 docker compose up -d --force-recreate  # recreer les containers
 ```
 
-### 13.7 Erreur « no space left on device » pendant le build
+### 12.7 Erreur « no space left on device » pendant le build
 
 ```bash
 docker system df                  # voir l'espace utilise
@@ -780,7 +745,7 @@ df -h /                           # verifier l'espace disque host
 
 ---
 
-## 14. Annexes
+## 13. Annexes
 
 ### 14.1 Structure des fichiers
 
@@ -903,7 +868,7 @@ docker stats --no-stream
 
 ---
 
-## 15. Déploiement depuis un autre repository
+## 14. Déploiement depuis un autre repository
 
 Le guide utilise partout le repo canonique `https://github.com/Mike5449/MonCash_BI.git`. Si votre code source vit ailleurs (copie interne Bitbucket / GitLab / Azure DevOps Digicel, autre organisation, etc.), l'adaptation est minimale : **remplacer l'URL de `git clone`**.
 
@@ -916,7 +881,7 @@ par :
 git clone https://<host>/<votre-org>/<votre-repo>.git moncash-portal
 ```
 
-Tout le reste des §3 à §13 reste **identique**.
+Tout le reste des §3 à §12 reste **identique**.
 
 ---
 
