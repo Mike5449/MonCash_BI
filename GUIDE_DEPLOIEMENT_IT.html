@@ -1164,109 +1164,12 @@ EOF
 <!-- ═══════════════════════════════════════════════════════════════ -->
 <section id="s15">
   <h2><span class="anchor">15.</span> Déploiement depuis un autre repository</h2>
-  <p>Le guide utilise partout le repo canonique <code>https://github.com/Mike5449/MonCash_BI.git</code>. Cette section explique comment adapter le déploiement si votre code source est ailleurs :</p>
-  <ul>
-    <li>une <strong>copie interne</strong> hébergée sur Bitbucket / GitLab / Azure DevOps Digicel</li>
-    <li>un <strong>repo privé</strong> qui nécessite authentification</li>
-    <li>un <strong>nouveau nom de projet</strong> (par ex. instance Jamaïque, Ghana, autre pays Digicel)</li>
-  </ul>
-
-  <h3>15.1 Cas 1 — Nouveau repo <strong>public</strong></h3>
-  <p><strong>Adaptation minimale</strong> : juste remplacer l'URL de <code>git clone</code>.</p>
+  <p>Le guide utilise partout le repo canonique <code>https://github.com/Mike5449/MonCash_BI.git</code>. Si votre code source vit ailleurs (copie interne Bitbucket / GitLab / Azure DevOps Digicel, autre organisation, etc.), l'adaptation est minimale : <strong>remplacer l'URL de <code>git clone</code></strong>.</p>
   <p>Dans le guide §6, remplacez :</p>
 <pre><span class="cmd">git</span> clone https://github.com/Mike5449/MonCash_BI.git moncash-portal</pre>
   <p>par :</p>
 <pre><span class="cmd">git</span> clone https://&lt;host&gt;/&lt;votre-org&gt;/&lt;votre-repo&gt;.git moncash-portal</pre>
   <p>Tout le reste des §3 à §13 reste <strong>identique</strong>.</p>
-
-  <h3>15.2 Cas 2 — Repo <strong>privé</strong> avec Deploy Key SSH <span class="badge ok">Recommandé</span></h3>
-  <p>Une <strong>Deploy Key</strong> est une clé SSH ajoutée à UN seul repo — le serveur peut cloner en lecture seule, sans avoir accès aux autres repos de l'organisation. C'est l'approche recommandée pour un serveur de production.</p>
-<pre><span class="cmt"># 1. Sur le serveur, generer une paire de cles SSH dediee</span>
-<span class="cmd">ssh-keygen</span> -t ed25519 -C <span class="str">"moncash-bi-deploy-key"</span> -f ~/.ssh/moncash_deploy -N <span class="str">""</span>
-
-<span class="cmt"># 2. Afficher la cle publique (a copier dans le repo)</span>
-<span class="cmd">cat</span> ~/.ssh/moncash_deploy.pub
-
-<span class="cmt"># 3. Dans l'interface web du repo :</span>
-<span class="cmt">#    GitHub    : Settings -&gt; Deploy keys -&gt; Add deploy key</span>
-<span class="cmt">#                -&gt; coller la cle, "Allow write access" DECOCHE</span>
-<span class="cmt">#    GitLab    : Settings -&gt; Repository -&gt; Deploy Keys</span>
-<span class="cmt">#    Bitbucket : Repository settings -&gt; Access keys</span>
-
-<span class="cmt"># 4. Configurer SSH pour utiliser cette cle avec ce repo</span>
-<span class="cmd">cat</span> &gt;&gt; ~/.ssh/config &lt;&lt; <span class="str">'EOF'</span>
-
-Host github-moncash
-  HostName github.com
-  User git
-  IdentityFile ~/.ssh/moncash_deploy
-  IdentitiesOnly yes
-EOF
-<span class="cmd">chmod</span> 600 ~/.ssh/config
-
-<span class="cmt"># 5. Cloner en utilisant l'alias defini ci-dessus</span>
-<span class="cmd">git</span> clone git@github-moncash:votre-org/votre-repo-prive.git /opt/moncash-portal</pre>
-  <p><strong>Adapter Host</strong> pour GitLab (<code>gitlab.com</code>) ou Bitbucket (<code>bitbucket.org</code>) selon votre plateforme.</p>
-  <div class="callout ok"><strong>Avantages Deploy Key</strong> :
-    <ul>
-      <li>Lecture seule → le serveur ne peut pas casser le repo par un push accidentel</li>
-      <li>Révocable indépendamment (utile en cas de compromission serveur)</li>
-      <li>Pas de compte utilisateur nominatif utilisé</li>
-    </ul>
-  </div>
-
-  <h3>15.3 Cas 3 — Repo <strong>privé</strong> avec Personal Access Token (PAT)</h3>
-  <p>Alternative simple si SSH n'est pas possible.</p>
-<pre><span class="cmt"># 1. Creer un PAT dans GitHub :</span>
-<span class="cmt">#    Settings -&gt; Developer settings -&gt; Personal access tokens</span>
-<span class="cmt">#    -&gt; Fine-grained token</span>
-<span class="cmt">#    Scope : Contents: read only, sur ce repo uniquement</span>
-<span class="cmt">#    Expiration : selon politique securite (ex: 90 jours)</span>
-
-<span class="cmt"># 2. Cloner en integrant le PAT dans l'URL</span>
-<span class="cmd">git</span> clone https://oauth2:&lt;PAT&gt;@github.com/votre-org/votre-repo.git /opt/moncash-portal
-
-<span class="cmt"># 3. Le PAT est stocke dans .git/config — restreindre les permissions</span>
-<span class="cmd">chmod</span> -R go-rwx /opt/moncash-portal/.git</pre>
-  <div class="callout warn"><strong>Inconvénients PAT</strong> :
-    <ul>
-      <li>Le token apparaît dans <code>.git/config</code> et dans les logs <code>git</code></li>
-      <li>Expire → doit être renouvelé manuellement</li>
-      <li>Attaché à un compte utilisateur nominatif (si la personne quitte Digicel, le token peut être révoqué)</li>
-    </ul>
-    Préférez la Deploy Key sauf si votre organisation impose les PATs.
-  </div>
-
-  <h3>15.4 Adapter les chemins et noms du déploiement</h3>
-  <p>Si vous voulez utiliser un nom de projet différent (par ex. <code>moncash-bi-jamaica</code> pour une instance jamaïquaine) :</p>
-  <table>
-    <thead><tr><th>Élément</th><th>Modification</th></tr></thead>
-    <tbody>
-      <tr><td><strong>Chemin serveur</strong></td><td><code>/opt/moncash-portal</code> → <code>/opt/&lt;votre-nom&gt;</code> dans toutes les commandes du guide</td></tr>
-      <tr><td><strong>Docker container names</strong></td><td>Dans <code>docker-compose.yml</code> : <code>container_name: bi-backend</code> → <code>container_name: &lt;votre-prefix&gt;-backend</code> (évite conflits si plusieurs instances sur le même serveur)</td></tr>
-      <tr><td><strong>Docker image names</strong></td><td><code>image: moncash/bi-backend:latest</code> → <code>image: &lt;votre-org&gt;/bi-backend:latest</code></td></tr>
-      <tr><td><strong>CN + SAN du certificat SSL</strong></td><td>Nouveau CN adapté au nouveau hostname (voir §3.4)</td></tr>
-      <tr><td><strong>CORS_ORIGINS</strong> dans .env</td><td>Nouvelles URLs autorisées</td></tr>
-      <tr><td><strong>ALLOWED_HOSTS</strong> dans .env</td><td>Nouveaux hostnames Digicel</td></tr>
-      <tr><td><strong>CRON_TZ</strong> du flush cache</td><td>Ajuster si autre fuseau horaire (<code>America/Jamaica</code>, <code>Africa/Accra</code>, etc.)</td></tr>
-      <tr><td><strong>Doc IT</strong></td><td>Rechercher-remplacer <code>ht-moncashreporting</code> / <code>172.20.197.246</code> dans les guides</td></tr>
-    </tbody>
-  </table>
-
-  <h3>15.5 Checklist pour un nouveau déploiement</h3>
-<pre class="diagram">□ Nouveau repo hebergement identifie (public ou prive)
-□ Serveur cible pret (voir §2, §3)
-□ Deploy Key generee et ajoutee au repo (si prive)
-□ git clone reussi vers /opt/&lt;nom-projet&gt;
-□ .env cree avec valeurs adaptees au nouveau contexte
-   - Databricks endpoint (peut etre le meme ou different)
-   - Azure SP (peut etre le meme SP ou un nouveau)
-   - CORS_ORIGINS + ALLOWED_HOSTS avec le nouveau hostname
-□ Certificat SSL genere avec le nouveau CN + SAN
-□ docker compose build &amp;&amp; up -d reussis
-□ Tests HTTP + navigateur OK
-□ Cron flush cache configure avec le bon fuseau horaire
-□ Documentation IT interne mise a jour avec la nouvelle URL</pre>
 </section>
 
 <!-- ═══════════════════════════════════════════════════════════════ -->
