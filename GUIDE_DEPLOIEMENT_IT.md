@@ -937,16 +937,15 @@ curl -sI http://localhost/
 
 ---
 
-## 15. Déploiement depuis un fork ou un autre repository
+## 15. Déploiement depuis un autre repository
 
-Le guide utilise partout le repo canonique `https://github.com/Mike5449/MonCash_BI.git`. Cette section explique comment adapter le déploiement si vous partez :
+Le guide utilise partout le repo canonique `https://github.com/Mike5449/MonCash_BI.git`. Cette section explique comment adapter le déploiement si votre code source est ailleurs :
 
-- d'un **fork** du repo original (par ex. dans l'organisation `digicel-haiti/`)
-- d'une **copie interne** hébergée sur Bitbucket / GitLab / Azure DevOps Digicel
-- d'un **repo privé** qui nécessite authentification
-- d'un **nouveau nom de projet** (par ex. instance Jamaïque, Ghana, autre pays Digicel)
+- une **copie interne** hébergée sur Bitbucket / GitLab / Azure DevOps Digicel
+- un **repo privé** qui nécessite authentification
+- un **nouveau nom de projet** (par ex. instance Jamaïque, Ghana, autre pays Digicel)
 
-### 15.1 Cas 1 — Nouveau repo **public** (fork ou copie)
+### 15.1 Cas 1 — Nouveau repo **public**
 
 **Adaptation minimale** : juste remplacer l'URL de `git clone`.
 
@@ -1040,35 +1039,10 @@ Si vous voulez utiliser un nom de projet différent (par ex. `moncash-bi-jamaica
 | **`CRON_TZ` du flush cache** | Ajuster si autre fuseau horaire (`America/Jamaica`, `Africa/Accra`, etc.) |
 | **Doc IT** | Rechercher-remplacer `ht-moncashreporting` / `172.20.197.246` dans les guides |
 
-### 15.5 Récupérer les mises à jour du repo original (upstream)
-
-Si vous avez forké, vous voudrez sûrement récupérer les correctifs du repo original de temps en temps.
-
-```bash
-cd /opt/moncash-portal
-
-# Ajouter le repo original comme "upstream" (une seule fois)
-git remote add upstream https://github.com/Mike5449/MonCash_BI.git
-git remote -v
-# Attendu :
-# origin    git@github-moncash:votre-org/votre-repo.git (fetch/push)
-# upstream  https://github.com/Mike5449/MonCash_BI.git   (fetch/push)
-
-# Tirer les updates de upstream
-git fetch upstream
-git merge upstream/main
-
-# Resoudre les eventuels conflits (typiquement dans docker-compose.yml,
-# .env.example, config.py si vous les avez customises)
-
-# Rebuild + redemarrer
-docker compose build && docker compose up -d
-```
-
-### 15.6 Résumé — checklist pour un nouveau déploiement
+### 15.5 Checklist pour un nouveau déploiement
 
 ```
-□ Fork ou copie du repo effectuee
+□ Nouveau repo hebergement identifie (public ou prive)
 □ Serveur cible pret (voir §2, §3)
 □ Deploy Key generee et ajoutee au repo (si prive)
 □ git clone reussi vers /opt/<nom-projet>
